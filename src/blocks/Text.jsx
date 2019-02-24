@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Actions from '../constants/actions';
+import Tooltip from '../tools/Tooltip';
 
 const styles = {
   wrapper: {
@@ -46,22 +47,29 @@ const styles = {
     whiteSpace: 'pre-wrap',
     width: '100%',
   },
+  tooltipWrapper: {
+    position: 'absolute',
+    zIndex: 5,
+    right: 0,
+    top: -7,
+  },
 };
 
 function Text({
   dispatch,
   content,
   id,
+  focus,
 }: BlockProps) {
-  const [isFocus, setFocus] = useState(false);
-
   return (
-    <div style={isFocus ? styles.focusWrapper : styles.wrapper}>
+    <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div style={styles.mainContent}>
         <textarea
           autoFocus
-          onFocus={() => setFocus(true)}
-          onBlur={() => setFocus(false)}
+          onFocus={() => dispatch({
+            type: Actions.FOCUS,
+            id,
+          })}
           onKeyDown={({ which }) => {
             switch (which) {
               case 8:
@@ -81,7 +89,6 @@ function Text({
 
             const newHeight = `${target.scrollHeight}px`;
             target.style.height = newHeight;
-            // target.parentNode.style.height = newHeight;
             target.parentNode.parentNode.style.height = newHeight;
           }}
           value={content}
@@ -97,6 +104,11 @@ function Text({
         <div style={styles.display}>
           {content}
         </div>
+        {focus && !content ? (
+          <div style={styles.tooltipWrapper}>
+            <Tooltip />
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -41,6 +41,32 @@ function initializer() {
 
 function reducer(state, action) {
   switch (action.type) {
+    case Actions.FOCUS: {
+      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
+
+      if (~updateIndex) {
+        return {
+          ...state,
+          blocks: [
+            ...state.blocks.slice(0, updateIndex).map(block => block.focus ? {
+              ...block,
+              focus: false,
+            } : block),
+            {
+              ...state.blocks[updateIndex],
+              focus: true,
+            },
+            ...state.blocks.slice(updateIndex + 1).map(block => block.focus ? {
+              ...block,
+              focus: false,
+            } : block),
+          ],
+        };
+      }
+
+      return state;
+    }
+
     case Actions.REMOVE_BLOCK: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
@@ -61,15 +87,38 @@ function reducer(state, action) {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
       if (~updateIndex) {
+        const targetBlock = state.blocks[updateIndex];
+
+        if (targetBlock.focus) {
+          return {
+            ...state,
+            blocks: [
+              ...state.blocks.slice(0, updateIndex),
+              {
+                ...state.blocks[updateIndex],
+                content: action.content,
+              },
+              ...state.blocks.slice(updateIndex + 1),
+            ],
+          };
+        }
+
         return {
           ...state,
           blocks: [
-            ...state.blocks.slice(0, updateIndex),
+            ...state.blocks.slice(0, updateIndex).map(block => block.focus ? {
+              ...block,
+              focus: false,
+            } : block),
             {
               ...state.blocks[updateIndex],
               content: action.content,
+              focus: true,
             },
-            ...state.blocks.slice(updateIndex + 1),
+            ...state.blocks.slice(updateIndex + 1).map(block => block.focus ? {
+              ...block,
+              focus: false,
+            } : block),
           ],
         };
       }
@@ -81,11 +130,15 @@ function reducer(state, action) {
       return {
         ...state,
         blocks: [
-          ...state.blocks,
+          ...state.blocks.map(block => block.focus ? {
+            ...block,
+            focus: false,
+          } : block),
           {
             id: uuid(),
             type: BlockTypes.TEXT,
             content: '',
+            focus: true,
           },
         ],
       };
@@ -99,6 +152,8 @@ function Editor({
   initialValues,
 }) {
   const [state, dispatch] = useReducer(reducer, initialValues, initializer);
+
+  console.log(state);
 
   return (
     <div style={styles.wrapper}>

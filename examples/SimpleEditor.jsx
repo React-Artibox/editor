@@ -15,8 +15,6 @@ const styles = {
     padding: 0,
     maxWidth: 720,
     height: '80vh',
-    border: '1px solid #d2d2d2',
-    borderRadius: 4,
   },
 };
 

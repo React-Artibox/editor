@@ -35,6 +35,22 @@ function reducer(state, action) {
   console.log('reduce', state, action);
 
   switch (action.type) {
+    case Actions.REMOVE_BLOCK: {
+      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
+
+      if (~updateIndex) {
+        return {
+          ...state,
+          blocks: [
+            ...state.blocks.slice(0, updateIndex),
+            ...state.blocks.slice(updateIndex + 1),
+          ],
+        };
+      }
+
+      return state;
+    }
+
     case Actions.CHANGE: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 

@@ -64,13 +64,26 @@ function Text({
           id,
           content: text,
         })}
-        onKeyPress={({ which }) => {
-          if (which === 13) {
-            dispatch({
-              type: Actions.NEW_LINE,
-              triggerId: id,
-              content: text,
-            });
+        onKeyDown={({ which }) => {
+          switch (which) {
+            case 8:
+              if (text === '') {
+                dispatch({
+                  type: Actions.REMOVE_BLOCK,
+                  id,
+                });
+              }
+
+            case 13:
+              dispatch({
+                type: Actions.NEW_LINE,
+                triggerId: id,
+                content: text,
+              });
+              break;
+
+            default:
+              break;
           }
         }}
         onInput={({ target }) => {

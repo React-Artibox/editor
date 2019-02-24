@@ -81,7 +81,6 @@ function ImageComponent({
       current.parentNode.style.height = `${height}px`;
 
       ctx.drawImage(image, 0, 0, width, height);
-
     }
   }
 
@@ -129,7 +128,11 @@ function ImageComponent({
 
     if (current) {
       if (parseImageURL) {
-        parseImageURL(content).then(url => fetchImageMetadata(url));
+        if (typeof parseImageURL.then === 'function') {
+          parseImageURL(content).then(url => fetchImageMetadata(url));
+        } else {
+          fetchImageMetadata(parseImageURL(content));
+        }
       } else {
         fetchImageMetadata(content);
       }

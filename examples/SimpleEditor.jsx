@@ -6,6 +6,7 @@ import { hot } from 'react-hot-loader';
 import {
   ArtiboxProvider,
   Editor,
+  createFileUploader,
 } from '../src/index';
 
 const styles = {
@@ -20,7 +21,11 @@ const styles = {
 
 function SimpleEditor() {
   return (
-    <ArtiboxProvider>
+    <ArtiboxProvider
+      options={{
+        parseImageFile: createFileUploader('http://sample.rytass.com/uploader/files', files => files[0]),
+        parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,
+      }}>
       <div style={styles.wrapper}>
         <Editor />
       </div>

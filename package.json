@@ -4,6 +4,7 @@
   "description": "Artibox Editor",
   "main": "lib/index.js",
   "scripts": {
+    "prepublishOnly": "NODE_ENV=production babel src -d lib && cp src/main.css lib",
     "start": "webpack-dev-server --config ./examples/webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

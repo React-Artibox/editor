@@ -8,7 +8,7 @@ import {
   Editor,
   createFileUploader,
   BlockTypes,
-} from '../src/index';
+} from '../lib/index';
 
 const styles = {
   wrapper: {

@@ -5,6 +5,7 @@ import Editor from './Editor';
 import Progress from './constants/progress';
 import { createFileUploader } from './parsers/image';
 import BlockTypes from './constants/blockTypes';
+import reduxFormEditor from './interfaces/reduxForm';
 
 export {
   ArtiboxProvider,
@@ -12,4 +13,5 @@ export {
   Progress,
   createFileUploader,
   BlockTypes,
+  reduxFormEditor,
 };

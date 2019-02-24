@@ -18,7 +18,7 @@ const styles = {
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
     flexDirection: 'column',
-    padding: 12,
+    padding: '12px 12px 12px 52px',
     height: '100%',
   },
   blockCreator: {
@@ -225,8 +225,6 @@ function Editor({
 
     onChange(state);
   }, [state]);
-
-  // console.log('->', state);
 
   return (
     <DispatchContext.Provider value={dispatch}>

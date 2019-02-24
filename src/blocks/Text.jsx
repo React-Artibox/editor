@@ -34,6 +34,7 @@ const styles = {
     resize: 'none',
     padding: 0,
     height: 26,
+    backgroundColor: 'transparent',
   },
   display: {
     position: 'absolute',

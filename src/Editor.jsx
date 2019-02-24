@@ -18,8 +18,8 @@ const styles = {
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
     flexDirection: 'column',
-    padding: '12px 12px 12px 52px',
-    height: '100%',
+    padding: '12px 52px',
+    minHeight: '100%',
   },
   blockCreator: {
     flexGrow: 1,

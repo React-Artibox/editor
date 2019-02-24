@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useRef } from 'react';
 import uuid from 'uuid/v4';
 import './main.css';
 import BlockTypes from './constants/blockTypes';
@@ -170,16 +170,50 @@ function reducer(state, action) {
   }
 }
 
+function usePreviousState(value) {
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current = value;
+  });
+
+  return ref.current;
+}
+
 function Editor({
   initialValues,
 }) {
   const [state, dispatch] = useReducer(reducer, initialValues, initializer);
+  const container = useRef();
+
+  const prevState = usePreviousState(state);
+
+  useEffect(() => {
+    if (prevState && prevState.blocks.length > state.blocks.length) {
+      const newBlockIds = state.blocks.map(block => block.id);
+      const oldBlockIds = prevState.blocks.map(block => block.id);
+      const removedId = oldBlockIds.find(oid => !~newBlockIds.indexOf(oid));
+      const removedIndex = oldBlockIds.indexOf(removedId);
+
+      if (~removedIndex) {
+        const { current } = container;
+
+        const inputs = current.querySelectorAll('.artibox-input');
+
+        if (removedIndex === 0) {
+          inputs[0].focus();
+        } else {
+          inputs[removedIndex - 1].focus();
+        }
+      }
+    }
+  }, [state]);
 
   console.log('->', state);
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <div style={styles.wrapper}>
+      <div ref={container} style={styles.wrapper}>
         {state.blocks.map((block) => {
           switch (block.type) {
             case BlockTypes.TEXT:

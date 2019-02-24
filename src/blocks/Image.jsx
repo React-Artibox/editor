@@ -26,7 +26,7 @@ const styles = {
     position: 'relative',
   },
   input: {
-    fontSize: 0,
+    fontSize: 1,
     color: 'transparent',
     border: 0,
     width: '100%',
@@ -147,6 +147,18 @@ function ImageComponent({
           onInput={e => e.preventDefault()}
           className="artibox-input"
           style={styles.input}
+          onKeyDown={({ which }) => {
+            switch (which) {
+              case 8:
+                dispatch({
+                  type: Actions.REMOVE_BLOCK,
+                  id,
+                });
+
+              default:
+                break;
+            }
+          }}
           onFocus={() => dispatch({
             type: Actions.FOCUS,
             id,

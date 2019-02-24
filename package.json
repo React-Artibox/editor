@@ -1,0 +1,61 @@
+{
+  "name": "@artibox/editor",
+  "version": "0.1.0",
+  "description": "Artibox Editor",
+  "main": "lib/index.js",
+  "scripts": {
+    "start": "webpack-dev-server --config ./examples/webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/React-Artibox/editor.git"
+  },
+  "keywords": [
+    "Rytass",
+    "Artibox",
+    "React"
+  ],
+  "author": "Chia Yu Pai (Rytass)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/React-Artibox/editor/issues"
+  },
+  "homepage": "https://github.com/React-Artibox/editor#readme",
+  "peerDependencies": {
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.3.1",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.0",
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-flowtype": "^3.4.2",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
+    "flow-bin": "^0.93.0",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
+    "react-hot-loader": "^4.7.1",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.0"
+  },
+  "dependencies": {
+    "radium": "^0.25.1",
+    "uuid": "^3.3.2"
+  }
+}

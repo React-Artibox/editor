@@ -1,0 +1,23 @@
+input.artibox-input::-webkit-input-placeholder {
+  color: #DBDBDB;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+input.artibox-input::-moz-placeholder {
+  color: #DBDBDB;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+input.artibox-input::-ms-input-placeholder {
+  color: #DBDBDB;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+input.artibox-input::placeholder {
+  color: #DBDBDB;
+  font-weight: 300;
+  letter-spacing: 1px;
+}

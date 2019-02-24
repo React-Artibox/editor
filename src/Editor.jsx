@@ -5,9 +5,11 @@ import uuid from 'uuid/v4';
 import './main.css';
 import BlockTypes from './constants/blockTypes';
 import Actions from './constants/actions';
+import { Dispatch as DispatchContext } from './constants/context';
 
 // Blocks
 import Text from './blocks/Text';
+import Image from './blocks/Image';
 
 const styles = {
   wrapper: {
@@ -41,6 +43,26 @@ function initializer() {
 
 function reducer(state, action) {
   switch (action.type) {
+    case Actions.CHANGE_TYPE:
+      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
+
+      if (~updateIndex) {
+        return {
+          ...state,
+          blocks: [
+            ...state.blocks.slice(0, updateIndex),
+            {
+              ...state.blocks[updateIndex],
+              type: action.newType,
+              content: action.content,
+            },
+            ...state.blocks.slice(updateIndex + 1),
+          ],
+        };
+      }
+
+      return state;
+
     case Actions.FOCUS: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
@@ -153,48 +175,56 @@ function Editor({
 }) {
   const [state, dispatch] = useReducer(reducer, initialValues, initializer);
 
-  console.log(state);
+  console.log('->', state);
 
   return (
-    <div style={styles.wrapper}>
-      {state.blocks.map((block) => {
-        switch (block.type) {
-          case BlockTypes.TEXT:
-            return (
-              <Text
-                {...block}
-                dispatch={dispatch}
-                key={block.id} />
-            );
+    <DispatchContext.Provider value={dispatch}>
+      <div style={styles.wrapper}>
+        {state.blocks.map((block) => {
+          switch (block.type) {
+            case BlockTypes.TEXT:
+              return (
+                <Text
+                  {...block}
+                  key={block.id} />
+              );
 
-          default:
-            return null;
-        }
-      })}
-      <div
-        role="button"
-        onMouseDown={(e) => {
-          e.preventDefault();
+            case BlockTypes.IMAGE:
+              return (
+                <Image
+                  {...block}
+                  key={block.id} />
+              );
 
-          if (!state.blocks.length || !!state.blocks[state.blocks.length - 1].content) {
-            dispatch({ type: Actions.NEW_LINE });
-          } else if (document.activeElement === document.body) {
-            const allInputs = document.querySelectorAll('.artibox-input');
-            const lastInput = allInputs[allInputs.length - 1];
-
-            if (lastInput) {
-              lastInput.focus();
-            }
+            default:
+              return null;
           }
-        }}
-        style={styles.blockCreator}>
-        {state.blocks.length ? null : (
-          <span style={styles.blockCreatorPlaceholder}>
-            在此處輸入內容
-          </span>
-        )}
+        })}
+        <div
+          role="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+
+            if (!state.blocks.length || !!state.blocks[state.blocks.length - 1].content) {
+              dispatch({ type: Actions.NEW_LINE });
+            } else if (document.activeElement === document.body) {
+              const allInputs = document.querySelectorAll('.artibox-input');
+              const lastInput = allInputs[allInputs.length - 1];
+
+              if (lastInput) {
+                lastInput.focus();
+              }
+            }
+          }}
+          style={styles.blockCreator}>
+          {state.blocks.length ? null : (
+            <span style={styles.blockCreatorPlaceholder}>
+              在此處輸入內容
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </DispatchContext.Provider>
   );
 }
 

@@ -1,8 +1,9 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import Actions from '../constants/actions';
 import Tooltip from '../tools/Tooltip';
+import { Dispatch as DispatchContext } from '../constants/context';
 
 const styles = {
   wrapper: {
@@ -56,11 +57,12 @@ const styles = {
 };
 
 function Text({
-  dispatch,
   content,
   id,
   focus,
 }: BlockProps) {
+  const dispatch = useContext(DispatchContext);
+
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div style={styles.mainContent}>
@@ -99,14 +101,13 @@ function Text({
           })}
           className="artibox-input"
           placeholder="在此輸入內容"
-          style={styles.input}
-          type="text" />
+          style={styles.input} />
         <div style={styles.display}>
           {content}
         </div>
         {focus && !content ? (
           <div style={styles.tooltipWrapper}>
-            <Tooltip />
+            <Tooltip blockId={id} />
           </div>
         ) : null}
       </div>

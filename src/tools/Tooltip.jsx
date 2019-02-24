@@ -1,7 +1,13 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Icons from '../constants/icons';
+import {
+  Dispatch as DispatchContext,
+  Config as ConfigContext,
+} from '../constants/context';
+import Actions from '../constants/actions';
+import BlockTypes from '../constants/blockTypes';
 
 const styles = {
   wrapper: {
@@ -41,8 +47,16 @@ const styles = {
   },
 };
 
-function Tooltip() {
+type Props = {
+  blockId: string,
+};
+
+function Tooltip({
+  blockId,
+}: Props) {
   const [isHover, setHover] = useState(false);
+  const { parseImageFile } = useContext(ConfigContext);
+  const dispatch = useContext(DispatchContext);
 
   return (
     <div
@@ -55,6 +69,18 @@ function Tooltip() {
         type="button">
         <Icons.PHOTO fill={isHover ? '#242424' : '#DBDBDB'} />
         <input
+          onChange={async ({ target: { files }}) => {
+            if (files && files.length) {
+              const url = await parseImageFile(files[0]);
+
+              dispatch({
+                type: Actions.CHANGE_TYPE,
+                id: blockId,
+                newType: BlockTypes.IMAGE,
+                content: url,
+              });
+            }
+          }}
           style={styles.imagePicker}
           type="file"
           accept="image/*" />

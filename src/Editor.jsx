@@ -35,9 +35,20 @@ const styles = {
   },
 };
 
-function initializer() {
+function initializer(initialValues = { blocks: [] }) {
+  const lastIndex = initialValues.blocks.length - 1;
+
   return {
-    blocks: [],
+    ...initialValues,
+    blocks: [
+      ...initialValues.blocks.map((block, index) => index === lastIndex ? {
+        ...block,
+        focus: true,
+      } : {
+        ...block,
+        focus: false,
+      }),
+    ],
   };
 }
 
@@ -182,13 +193,17 @@ function usePreviousState(value) {
 
 function Editor({
   initialValues,
+  onChange,
 }) {
+  if (typeof onChange !== 'function') throw new Error('Please pass onChange function to get data update.');
+
   const [state, dispatch] = useReducer(reducer, initialValues, initializer);
   const container = useRef();
 
   const prevState = usePreviousState(state);
 
   useEffect(() => {
+    // Focus on block removed
     if (prevState && prevState.blocks.length > state.blocks.length) {
       const newBlockIds = state.blocks.map(block => block.id);
       const oldBlockIds = prevState.blocks.map(block => block.id);
@@ -207,9 +222,11 @@ function Editor({
         }
       }
     }
+
+    onChange(state);
   }, [state]);
 
-  console.log('->', state);
+  // console.log('->', state);
 
   return (
     <DispatchContext.Provider value={dispatch}>

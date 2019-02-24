@@ -7,7 +7,8 @@ import { fileToBase64URL } from './parsers/image';
 type Props = {
   children: any,
   options?: {
-
+    parseImageFile?: Function,
+    parseImageURL?: ?Function,
   },
 };
 

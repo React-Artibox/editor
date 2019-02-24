@@ -1,8 +1,9 @@
 // @flow
 
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { Fragment, useContext, useState, useRef, useEffect } from 'react';
 import Actions from '../constants/actions';
 import Tooltip from '../tools/Tooltip';
+import Icons from '../constants/icons';
 import {
   Config as ConfigContext,
   Dispatch as DispatchContext,
@@ -14,16 +15,19 @@ const styles = {
     borderLeft: '2px solid transparent',
     padding: '0 12px',
     margin: '12px 0',
+    minHeight: 168,
   },
   focusWrapper: {
     width: '100%',
     borderLeft: '2px solid #FA5F5F',
     padding: '0 12px',
     margin: '12px 0',
+    minHeight: 168,
   },
   mainContent: {
     width: '100%',
     position: 'relative',
+    minHeight: 168,
   },
   input: {
     fontSize: 1,
@@ -55,6 +59,27 @@ const styles = {
     padding: '0 0 0 2px',
     margin: '12px 0',
   },
+  imageMenu: {
+    position: 'absolute',
+    top: 0,
+    left: -60,
+    zIndex: 5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
+  imageMenuBtn: {
+    border: '1px solid #DBDBDB',
+    borderRadius: 4,
+    width: 40,
+    height: 40,
+    marginBottom: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
 };
 
 function ImageComponent({
@@ -69,6 +94,7 @@ function ImageComponent({
   const [src, setSrc] = useState(null);
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
+  const [menuHover, setMenuHover] = useState(false);
 
   // Draw on canvas
   function draw(image) {
@@ -164,7 +190,32 @@ function ImageComponent({
             id,
           })} />
         {content ? (
-          <canvas width={width} height={height} />
+          <Fragment>
+            <canvas width={width} height={height} />
+            <div
+              onMouseEnter={() => setMenuHover(true)}
+              onMouseLeave={() => setMenuHover(false)}
+              style={styles.imageMenu}>
+              <button
+                className="artibox-tooltip-btn"
+                style={styles.imageMenuBtn}
+                type="button">
+                <Icons.REMARK fill={menuHover ? '#242424' : '#DBDBDB'} />
+              </button>
+              <button
+                className="artibox-tooltip-btn"
+                style={styles.imageMenuBtn}
+                type="button">
+                <Icons.LINK fill={menuHover ? '#242424' : '#DBDBDB'} />
+              </button>
+              <button
+                className="artibox-tooltip-btn"
+                style={styles.imageMenuBtn}
+                type="button">
+                <Icons.ALIGN fill={menuHover ? '#242424' : '#DBDBDB'} />
+              </button>
+            </div>
+          </Fragment>
         ) : (
           <div style={styles.placeholder}>
             <Icons.PHOTO fill="#DBDBDB" />

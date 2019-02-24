@@ -7,6 +7,7 @@ import {
   ArtiboxProvider,
   Editor,
   createFileUploader,
+  BlockTypes,
 } from '../src/index';
 
 const styles = {
@@ -27,7 +28,7 @@ function SimpleEditor() {
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,
       }}>
       <div style={styles.wrapper}>
-        <Editor />
+        <Editor onChange={(state) => console.log('HELLO', state)} />
       </div>
     </ArtiboxProvider>
   );

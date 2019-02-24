@@ -9,6 +9,8 @@ function ReduxFormWrapper({
     value,
   },
 }) {
+  if (!value) return null;
+
   return (
     <Editor initialValues={value} onChange={onChange} />
   );

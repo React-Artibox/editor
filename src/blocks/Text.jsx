@@ -1,14 +1,23 @@
 // @flow
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Actions from '../constants/actions';
-import Flags from '../constants/flags';
 
 const styles = {
   wrapper: {
     width: '100%',
-    height: 26,
     borderLeft: '2px solid transparent',
+    padding: '0 12px',
+    height: 26,
+  },
+  focusWrapper: {
+    width: '100%',
+    borderLeft: '2px solid #FA5F5F',
+    padding: '0 12px',
+    height: 26,
+  },
+  mainContent: {
+    width: '100%',
     position: 'relative',
   },
   input: {
@@ -44,60 +53,50 @@ function Text({
   content,
   id,
 }: BlockProps) {
-  const [text, setText] = useState(content);
-  const textarea = useRef();
-
-  useEffect(() => {
-    if (text === Flags.FRESH_BLOCK) {
-      textarea.current.focus();
-
-      setText('');
-    }
-  });
+  const [isFocus, setFocus] = useState(false);
 
   return (
-    <div style={styles.wrapper}>
-      <textarea
-        ref={textarea}
-        onBlur={() => dispatch({
-          type: Actions.CHANGE,
-          id,
-          content: text,
-        })}
-        onKeyDown={({ which }) => {
-          switch (which) {
-            case 8:
-              if (text === '') {
-                dispatch({
-                  type: Actions.REMOVE_BLOCK,
-                  id,
-                });
-              }
+    <div style={isFocus ? styles.focusWrapper : styles.wrapper}>
+      <div style={styles.mainContent}>
+        <textarea
+          autoFocus
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
+          onKeyDown={({ which }) => {
+            switch (which) {
+              case 8:
+                if (content === '') {
+                  dispatch({
+                    type: Actions.REMOVE_BLOCK,
+                    id,
+                  });
+                }
 
-            case 13:
-              dispatch({
-                type: Actions.NEW_LINE,
-                triggerId: id,
-                content: text,
-              });
-              break;
+              default:
+                break;
+            }
+          }}
+          onInput={({ target }) => {
+            target.style.height = '26px';
 
-            default:
-              break;
-          }
-        }}
-        onInput={({ target }) => {
-          target.style.height = '26px';
-          target.style.height = `${target.scrollHeight}px`;
-        }}
-        value={text === Flags.FRESH_BLOCK ? '' : text}
-        onChange={({ target: { value }}) => setText(value)}
-        className="artibox-input"
-        placeholder="在此輸入內容"
-        style={styles.input}
-        type="text" />
-      <div style={styles.display}>
-        {text}
+            const newHeight = `${target.scrollHeight}px`;
+            target.style.height = newHeight;
+            // target.parentNode.style.height = newHeight;
+            target.parentNode.parentNode.style.height = newHeight;
+          }}
+          value={content}
+          onChange={({ target: { value }}) => dispatch({
+            type: Actions.CHANGE,
+            id,
+            content: value,
+          })}
+          className="artibox-input"
+          placeholder="在此輸入內容"
+          style={styles.input}
+          type="text" />
+        <div style={styles.display}>
+          {content}
+        </div>
       </div>
     </div>
   );

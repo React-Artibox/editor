@@ -12,7 +12,7 @@ const styles = {
   wrapper: {
     width: '100%',
     margin: '32px auto',
-    padding: '32px 0',
+    padding: 0,
     maxWidth: 720,
     height: '80vh',
     border: '1px solid #d2d2d2',

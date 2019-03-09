@@ -8,6 +8,41 @@ import {
   Config as ConfigContext,
   Dispatch as DispatchContext,
 } from '../constants/context';
+import isURL from '../helpers/url';
+
+const baseStyles = {
+  metaEditor: {
+    width: '70%',
+    height: 0,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    boxShadow: 'none',
+    opacity: 0,
+    position: 'absolute',
+    top: 0,
+    left: -16,
+    border: 0,
+    zIndex: 0,
+  },
+  metaEditorShown: {
+    height: 'auto',
+    overflow: 'visible',
+    border: '1px solid #DBDBDB',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
+    opacity: 1,
+    transition: 'opacity 0.2s ease-out',
+    position: 'absolute',
+    top: 0,
+    left: -16,
+    zIndex: 10,
+    borderRadius: 4,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+    padding: '0 12px 12px 12px',
+  },
+};
 
 const styles = {
   wrapper: {
@@ -28,6 +63,10 @@ const styles = {
     width: '100%',
     position: 'relative',
     minHeight: 168,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
   },
   input: {
     fontSize: 1,
@@ -81,40 +120,15 @@ const styles = {
     cursor: 'pointer',
   },
   descriptionEditor: {
-    width: '70%',
-    height: 0,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
-    opacity: 1,
-    transition: 'opacity 0.2s ease-out',
-    position: 'absolute',
+    ...baseStyles.metaEditor,
     top: 0,
-    left: -16,
-    border: 0,
-    zIndex: 0,
-    borderRadius: 4,
   },
   descriptionEditorShown: {
-    width: '70%',
-    height: 128,
-    backgroundColor: '#fff',
-    border: '1px solid #DBDBDB',
-    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
-    opacity: 1,
-    transition: 'opacity 0.2s ease-out',
-    position: 'absolute',
+    ...baseStyles.metaEditor,
+    ...baseStyles.metaEditorShown,
     top: 0,
-    left: -16,
-    zIndex: 10,
-    borderRadius: 4,
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    flexDirection: 'column',
-    padding: '0 12px 12px 12px',
   },
-  descriptionModalTitle: {
+  metaModalTitle: {
     lineHeight: '32px',
     margin: 0,
     fontSize: 12,
@@ -125,11 +139,10 @@ const styles = {
     borderBottom: '1px solid #dfdfdf',
     margin: '0 0 12px 0',
   },
-  descriptionModalTextarea: {
+  metaModalTextarea: {
     border: 0,
     backgroundColor: 'transparent',
     width: '100%',
-    flexGrow: 1,
     fontSize: 15,
     color: '#4a4a4a',
     outline: 'none',
@@ -137,6 +150,21 @@ const styles = {
     resize: 'none',
     borderRadius: 4,
     backgroundColor: '#f3f3f3',
+    minHeight: '3em',
+  },
+  metaModalInput: {
+    border: 0,
+    backgroundColor: 'transparent',
+    width: '100%',
+    fontSize: 15,
+    color: '#4a4a4a',
+    outline: 'none',
+    padding: '0 0.6em',
+    resize: 'none',
+    borderRadius: 4,
+    backgroundColor: '#f3f3f3',
+    height: 30,
+    lineHeight: '30px',
   },
   description: {
     color: '#9b9b9b',
@@ -145,6 +173,31 @@ const styles = {
     width: '100%',
     lineHeight: 1.618,
     margin: 0,
+  },
+  linkEditor: {
+    ...baseStyles.metaEditor,
+    top: 64,
+  },
+  linkEditorShown: {
+    ...baseStyles.metaEditor,
+    ...baseStyles.metaEditorShown,
+    top: 64,
+  },
+  activeLink: {
+    width: 32,
+    height: 32,
+    position: 'absolute',
+    zIndex: 5,
+    right: 8,
+    top: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 16,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  canvasWrapper: {
+    position: 'relative',
   },
 };
 
@@ -158,6 +211,7 @@ function ImageComponent({
   const { parseImageURL } = useContext(ConfigContext);
   const container = useRef();
   const descriptionTextarea = useRef();
+  const linkTextInput = useRef();
 
   const [src, setSrc] = useState(null);
   const [height, setHeight] = useState(0);
@@ -165,6 +219,9 @@ function ImageComponent({
   const [menuHover, setMenuHover] = useState(false);
   const [isDescriptionModalShown, toggleDescriptionModalShown] = useState(false);
   const [description, setDescription] = useState(meta[ImageComponent.DESCRIPTION]);
+  const [isLinkModalShown, toggleLinkModalShown] = useState(false);
+  const [linkURL, setLinkURL] = useState(meta[ImageComponent.LINK]);
+  const [linkTarget, setLinkTarget] = useState(meta[ImageComponent.LINK_TARGET]);
 
   // Draw on canvas
   function draw(image) {
@@ -236,6 +293,8 @@ function ImageComponent({
   // Auto Focus On Description Modal Open
   useEffect(() => {
     if (isDescriptionModalShown) {
+      toggleLinkModalShown(false);
+
       dispatch({
         type: Actions.FOCUS,
         id,
@@ -258,6 +317,34 @@ function ImageComponent({
       }
     }
   }, [isDescriptionModalShown]);
+
+  // Auto Focus On Link Modal Open
+  useEffect(() => {
+    if (isLinkModalShown) {
+      toggleDescriptionModalShown(false);
+
+      dispatch({
+        type: Actions.FOCUS,
+        id,
+      });
+
+      const { current } = linkTextInput;
+
+      if (current) {
+        current.focus();
+      }
+    } else {
+      const { current } = container;
+
+      if (current) {
+        const textarea = current.querySelector('.artibox-input');
+
+        if (textarea) {
+          textarea.focus();
+        }
+      }
+    }
+  }, [isLinkModalShown]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
@@ -285,7 +372,17 @@ function ImageComponent({
           })} />
         {content ? (
           <Fragment>
-            <canvas width={width} height={height} />
+            <div style={styles.canvasWrapper}>
+              <canvas width={width} height={height} />
+              {isURL(linkURL) ? (
+                <a
+                  href={linkURL}
+                  style={styles.activeLink}
+                  target={linkTarget ? "_blank" : "_self"}>
+                  <Icons.LINK fill="#777" />
+                </a>
+              ) : null}
+            </div>
             {description ? (
               <p style={styles.description}>
                 {description}
@@ -304,10 +401,11 @@ function ImageComponent({
                   fill={(menuHover || description) ? '#242424' : '#DBDBDB'} />
               </button>
               <button
+                onClick={() => toggleLinkModalShown(!isLinkModalShown)}
                 className="artibox-tooltip-btn"
                 style={styles.imageMenuBtn}
                 type="button">
-                <Icons.LINK fill={menuHover ? '#242424' : '#DBDBDB'} />
+                <Icons.LINK fill={menuHover || isURL(linkURL) ? '#242424' : '#DBDBDB'} />
               </button>
               <button
                 className="artibox-tooltip-btn"
@@ -317,7 +415,7 @@ function ImageComponent({
               </button>
             </div>
             <div style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
-              <h6 style={styles.descriptionModalTitle}>Caption</h6>
+              <h6 style={styles.metaModalTitle}>Caption</h6>
               <textarea
                 ref={descriptionTextarea}
                 value={description}
@@ -333,7 +431,28 @@ function ImageComponent({
                   });
                 }}
                 onChange={({ target }) => setDescription(target.value)}
-                style={styles.descriptionModalTextarea} />
+                style={styles.metaModalTextarea} />
+            </div>
+            <div style={isLinkModalShown ? styles.linkEditorShown : styles.linkEditor}>
+              <h6 style={styles.metaModalTitle}>Link</h6>
+              <input
+                type="text"
+                ref={linkTextInput}
+                value={linkURL}
+                placeholder="https://"
+                onBlur={() => {
+                  toggleLinkModalShown(false);
+
+                  dispatch({
+                    type: Actions.SET_METADATA,
+                    id,
+                    meta: {
+                      [ImageComponent.LINK]: linkURL,
+                    },
+                  });
+                }}
+                onChange={({ target }) => setLinkURL(target.value)}
+                style={styles.metaModalInput} />
             </div>
           </Fragment>
         ) : (
@@ -348,5 +467,9 @@ function ImageComponent({
 }
 
 ImageComponent.DESCRIPTION = 'DESCRIPTION';
+
+ImageComponent.LINK = 'LINK';
+
+ImageComponent.LINK_TARGET = 'LINK_TARGET';
 
 export default ImageComponent;

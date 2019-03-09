@@ -80,21 +80,72 @@ const styles = {
     justifyContent: 'center',
     cursor: 'pointer',
   },
+  descriptionEditor: {
+    width: '70%',
+    height: 0,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
+    opacity: 1,
+    transition: 'opacity 0.2s ease-out',
+    position: 'absolute',
+    top: 0,
+    left: -16,
+    border: 0,
+    zIndex: 0,
+    borderRadius: 4,
+  },
+  descriptionEditorShown: {
+    width: '70%',
+    height: 128,
+    backgroundColor: '#fff',
+    border: '1px solid #DBDBDB',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
+    opacity: 1,
+    transition: 'opacity 0.2s ease-out',
+    position: 'absolute',
+    top: 0,
+    left: -16,
+    zIndex: 10,
+    borderRadius: 4,
+  },
+  descriptionModalTextarea: {
+    border: 0,
+    backgroundColor: 'transparent',
+    width: '100%',
+    height: '100%',
+    fontSize: 15,
+    color: '#4a4a4a',
+    outline: 'none',
+    padding: '0.5em 0.6em',
+  },
+  description: {
+    color: '#9b9b9b',
+    fontSize: 13,
+    textAlign: 'center',
+    width: '100%',
+    lineHeight: 1.618,
+    margin: 0,
+  },
 };
 
 function ImageComponent({
   content,
   id,
   focus,
+  meta,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
   const { parseImageURL } = useContext(ConfigContext);
   const container = useRef();
+  const descriptionTextarea = useRef();
 
   const [src, setSrc] = useState(null);
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
   const [menuHover, setMenuHover] = useState(false);
+  const [isDescriptionModalShown, toggleDescriptionModalShown] = useState(false);
+  const [description, setDescription] = useState(meta[ImageComponent.DESCRIPTION]);
 
   // Draw on canvas
   function draw(image) {
@@ -102,9 +153,6 @@ function ImageComponent({
       const { current } = container;
       const canvas = current.querySelector('canvas');
       const ctx = canvas.getContext('2d');
-
-      current.style.height = `${height}px`;
-      current.parentNode.style.height = `${height}px`;
 
       ctx.drawImage(image, 0, 0, width, height);
     }
@@ -149,6 +197,7 @@ function ImageComponent({
     img.src = url;
   }
 
+  // Update Image
   useEffect(() => {
     const { current } = container;
 
@@ -164,6 +213,32 @@ function ImageComponent({
       }
     }
   });
+
+  // Auto Focus On Description Modal Open
+  useEffect(() => {
+    if (isDescriptionModalShown) {
+      dispatch({
+        type: Actions.FOCUS,
+        id,
+      });
+
+      const { current } = descriptionTextarea;
+
+      if (current) {
+        current.focus();
+      }
+    } else {
+      const { current } = container;
+
+      if (current) {
+        const textarea = current.querySelector('.artibox-input');
+
+        if (textarea) {
+          textarea.focus();
+        }
+      }
+    }
+  }, [isDescriptionModalShown]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
@@ -192,15 +267,22 @@ function ImageComponent({
         {content ? (
           <Fragment>
             <canvas width={width} height={height} />
+            {description ? (
+              <p style={styles.description}>
+                {description}
+              </p>
+            ) : null}
             <div
               onMouseEnter={() => setMenuHover(true)}
               onMouseLeave={() => setMenuHover(false)}
               style={styles.imageMenu}>
               <button
+                onClick={() => toggleDescriptionModalShown(!isDescriptionModalShown)}
                 className="artibox-tooltip-btn"
                 style={styles.imageMenuBtn}
                 type="button">
-                <Icons.REMARK fill={menuHover ? '#242424' : '#DBDBDB'} />
+                <Icons.REMARK
+                  fill={(menuHover || description) ? '#242424' : '#DBDBDB'} />
               </button>
               <button
                 className="artibox-tooltip-btn"
@@ -215,6 +297,25 @@ function ImageComponent({
                 <Icons.ALIGN fill={menuHover ? '#242424' : '#DBDBDB'} />
               </button>
             </div>
+            <div
+              style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
+              <textarea
+                ref={descriptionTextarea}
+                value={description}
+                onBlur={() => {
+                  toggleDescriptionModalShown(false);
+
+                  dispatch({
+                    type: Actions.SET_METADATA,
+                    id,
+                    meta: {
+                      [ImageComponent.DESCRIPTION]: description,
+                    },
+                  });
+                }}
+                onChange={({ target }) => setDescription(target.value)}
+                style={styles.descriptionModalTextarea} />
+            </div>
           </Fragment>
         ) : (
           <div style={styles.placeholder}>
@@ -226,5 +327,7 @@ function ImageComponent({
     </div>
   );
 }
+
+ImageComponent.DESCRIPTION = 'DESCRIPTION';
 
 export default ImageComponent;

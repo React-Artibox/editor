@@ -54,6 +54,29 @@ function initializer(initialValues = { blocks: [] }) {
 
 function reducer(state, action) {
   switch (action.type) {
+    case Actions.SET_METADATA: {
+      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
+
+      if (~updateIndex) {
+        return {
+          ...state,
+          blocks: [
+            ...state.blocks.slice(0, updateIndex),
+            {
+              ...state.blocks[updateIndex],
+              meta: {
+                ...state.blocks[updateIndex].meta,
+                ...action.meta,
+              },
+            },
+            ...state.blocks.slice(updateIndex + 1),
+          ],
+        };
+      }
+
+      return state;
+    }
+
     case Actions.CHANGE_TYPE:
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
@@ -172,6 +195,7 @@ function reducer(state, action) {
             type: BlockTypes.TEXT,
             content: '',
             focus: true,
+            meta: {},
           },
         ],
       };

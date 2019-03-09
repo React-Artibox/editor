@@ -108,16 +108,35 @@ const styles = {
     left: -16,
     zIndex: 10,
     borderRadius: 4,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+    padding: '0 12px 12px 12px',
+  },
+  descriptionModalTitle: {
+    lineHeight: '32px',
+    margin: 0,
+    fontSize: 12,
+    color: '#4a4a4a',
+    letterSpacing: 1,
+    width: '100%',
+    padding: '2px 0 0 1px',
+    borderBottom: '1px solid #dfdfdf',
+    margin: '0 0 12px 0',
   },
   descriptionModalTextarea: {
     border: 0,
     backgroundColor: 'transparent',
     width: '100%',
-    height: '100%',
+    flexGrow: 1,
     fontSize: 15,
     color: '#4a4a4a',
     outline: 'none',
     padding: '0.5em 0.6em',
+    resize: 'none',
+    borderRadius: 4,
+    backgroundColor: '#f3f3f3',
   },
   description: {
     color: '#9b9b9b',
@@ -297,8 +316,8 @@ function ImageComponent({
                 <Icons.ALIGN fill={menuHover ? '#242424' : '#DBDBDB'} />
               </button>
             </div>
-            <div
-              style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
+            <div style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
+              <h6 style={styles.descriptionModalTitle}>Caption</h6>
               <textarea
                 ref={descriptionTextarea}
                 value={description}

@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useReducer, useEffect, useRef } from 'react';
+import React, { useState, useReducer, useEffect, useRef } from 'react';
 import uuid from 'uuid/v4';
 import './main.css';
 import BlockTypes from './constants/blockTypes';
@@ -10,6 +10,7 @@ import { Dispatch as DispatchContext } from './constants/context';
 // Blocks
 import Text from './blocks/Text';
 import Image from './blocks/Image';
+import YouTube from './blocks/YouTube';
 
 const styles = {
   wrapper: {
@@ -223,6 +224,7 @@ function Editor({
 
   const [state, dispatch] = useReducer(reducer, initialValues, initializer);
   const container = useRef();
+  const [isYouTubeAPILoaded, setYouTubeAPILoaded] = useState(false);
 
   const prevState = usePreviousState(state);
 
@@ -247,6 +249,20 @@ function Editor({
       }
     }
 
+    // Detect YouTube Block
+    if (!isYouTubeAPILoaded && state.blocks.find(block => block.type === BlockTypes.YOUTUBE)) {
+      const youTubeAPIScript = document.createElement('script');
+      youTubeAPIScript.src = 'https://www.youtube.com/iframe_api';
+
+      document.body.appendChild(youTubeAPIScript);
+
+      window.onYouTubeIframeAPIReady = () => {
+        setYouTubeAPILoaded(true);
+
+        youTubeAPIScript.remove();
+      };
+    }
+
     onChange(state);
   }, [state]);
 
@@ -255,6 +271,13 @@ function Editor({
       <div ref={container} style={styles.wrapper}>
         {state.blocks.map((block) => {
           switch (block.type) {
+            case BlockTypes.YOUTUBE:
+              return isYouTubeAPILoaded ? (
+                <YouTube
+                  {...block}
+                  key={block.id} />
+              ) : null;
+
             case BlockTypes.TEXT:
               return (
                 <Text

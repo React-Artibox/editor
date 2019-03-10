@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Fragment, useState, useContext, useEffect } from 'react';
+import React, { Fragment, useRef, useState, useContext, useEffect } from 'react';
 import { EventEmitter } from 'events';
 import Icons from '../constants/icons';
 import {
@@ -193,6 +193,7 @@ function Tooltip({
   const [isYouTubeURLInputShown, setYouTubeURLInputShow] = useState(false);
   const [youTubeURL, setYouTubeURL] = useState('');
   const [isVaildYouTubeURL, setIsValidYouTubeURL] = useState(false);
+  const youtubeInput = useRef();
 
   const {
     parseImageFile,
@@ -207,7 +208,13 @@ function Tooltip({
 
   // Reset YouTube URL Input
   useEffect(() => {
-    if (!isYouTubeURLInputShown) {
+    if (isYouTubeURLInputShown) {
+      const { current } = youtubeInput;
+
+      if (current) {
+        current.focus();
+      }
+    } else {
       setIsValidYouTubeURL(false);
       setYouTubeURL('');
     }
@@ -289,6 +296,20 @@ function Tooltip({
               <h6 style={styles.urlInputTitle}>YouTube URL:</h6>
               <div style={styles.urlInputWrapper}>
                 <input
+                  onKeyPress={({ which }) => {
+                    console.log(which);
+                    if (isVaildYouTubeURL && which === 13) {
+                      dispatch({
+                        type: Actions.CHANGE_TYPE,
+                        id: blockId,
+                        newType: BlockTypes.YOUTUBE,
+                        content: getYouTubeId(youTubeURL),
+                      });
+
+                      setYouTubeURLInputShow(false);
+                    }
+                  }}
+                  ref={youtubeInput}
                   onChange={({ target }) => setYouTubeURL(target.value)}
                   value={youTubeURL}
                   style={styles.urlInput}

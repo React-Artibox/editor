@@ -479,6 +479,17 @@ function ImageComponent({
     }
   }, [isLinkModalShown]);
 
+  // Update Align
+  useEffect(() => {
+    dispatch({
+      type: Actions.SET_METADATA,
+      id,
+      meta: {
+        [ImageComponent.ALIGN]: align,
+      },
+    });
+  }, [align]);
+
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div ref={container} style={getAlignedStyle(align, styles.mainContent)}>

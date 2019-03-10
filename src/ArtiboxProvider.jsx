@@ -18,7 +18,7 @@ const defaultOptions = {
   parseImageURL: null,
   availableTypes: [
     BlockTypes.IMAGE,
-    BlockTypes.VIDEO,
+    BlockTypes.YOUTUBE,
     BlockTypes.SLIDESHOW,
     BlockTypes.INSTAGRAM,
     BlockTypes.FACEBOOK,

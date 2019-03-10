@@ -5,7 +5,7 @@ export default {
   TITLE: Symbol('Artibox/Block/TITLE'),
   SUBTITLE: Symbol('Artibox/Block/SUBTITLE'),
   IMAGE: Symbol('Artibox/Block/IMAGE'),
-  VIDEO: Symbol('Artibox/Block/VIDEO'),
+  YOUTUBE: Symbol('Artibox/Block/YOUTUBE'),
   SLIDESHOW: Symbol('Artibox/Block/SLIDESHOW'),
   INSTAGRAM: Symbol('Artibox/Block/INSTAGRAM'),
   FACEBOOK: Symbol('Artibox/Block/FACEBOOK'),

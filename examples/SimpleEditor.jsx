@@ -26,7 +26,7 @@ function SimpleEditor() {
       options={{
         availableTypes: [
           BlockTypes.IMAGE,
-          BlockTypes.VIDEO,
+          BlockTypes.YOUTUBE,
         ],
         parseImageFile: createFileUploader('http://sample.rytass.com/uploader/files', files => files[0]),
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,

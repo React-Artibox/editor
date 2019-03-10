@@ -199,6 +199,69 @@ const styles = {
   canvasWrapper: {
     position: 'relative',
   },
+  linkTargetButton: {
+    position: 'absolute',
+    top: 10,
+    left: 48,
+    padding: 0,
+    outline: 'none',
+    cursor: 'pointer',
+    border: 0,
+    backgroundColor: 'transparent',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+    color: '#4a4a4a',
+    fontSize: 10,
+    letterSpacing: 1,
+  },
+  checkboxWrapper: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    border: '1px solid #dfdfdf',
+    padding: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 6px 0 0',
+  },
+  checkboxChecked: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1BDCDC',
+  },
+  removeBtn: {
+    width: 14,
+    height: 14,
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#BD0017',
+    borderRadius: 7,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: 0,
+    padding: 0,
+    outline: 'none',
+    cursor: 'pointer',
+  },
+  removeBtnLine1: {
+    backgroundColor: '#fff',
+    width: 8,
+    height: 1,
+    transform: 'rotate(45deg)',
+    position: 'absolute',
+  },
+  removeBtnLine2: {
+    backgroundColor: '#fff',
+    width: 8,
+    height: 1,
+    transform: 'rotate(135deg)',
+    position: 'absolute',
+  },
 };
 
 function ImageComponent({
@@ -308,6 +371,14 @@ function ImageComponent({
     } else {
       const { current } = container;
 
+      dispatch({
+        type: Actions.SET_METADATA,
+        id,
+        meta: {
+          [ImageComponent.DESCRIPTION]: description,
+        },
+      });
+
       if (current) {
         const textarea = current.querySelector('.artibox-input');
 
@@ -335,6 +406,15 @@ function ImageComponent({
       }
     } else {
       const { current } = container;
+
+      dispatch({
+        type: Actions.SET_METADATA,
+        id,
+        meta: {
+          [ImageComponent.LINK]: linkURL,
+          [ImageComponent.LINK_TARGET]: linkTarget,
+        },
+      });
 
       if (current) {
         const textarea = current.querySelector('.artibox-input');
@@ -378,7 +458,7 @@ function ImageComponent({
                 <a
                   href={linkURL}
                   style={styles.activeLink}
-                  target={linkTarget ? "_blank" : "_self"}>
+                  target={linkTarget ? '_self' : '_blank'}>
                   <Icons.LINK fill="#777" />
                 </a>
               ) : null}
@@ -411,46 +491,49 @@ function ImageComponent({
                 className="artibox-tooltip-btn"
                 style={styles.imageMenuBtn}
                 type="button">
-                <Icons.ALIGN fill={menuHover ? '#242424' : '#DBDBDB'} />
+                <Icons.ALIGN_LEFT fill={menuHover ? '#242424' : '#DBDBDB'} />
               </button>
             </div>
             <div style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
               <h6 style={styles.metaModalTitle}>Caption</h6>
+              <button
+                onClick={() => toggleDescriptionModalShown(false)}
+                style={styles.removeBtn}
+                type="button">
+                <span style={styles.removeBtnLine1} />
+                <span style={styles.removeBtnLine2} />
+              </button>
               <textarea
                 ref={descriptionTextarea}
                 value={description}
-                onBlur={() => {
-                  toggleDescriptionModalShown(false);
-
-                  dispatch({
-                    type: Actions.SET_METADATA,
-                    id,
-                    meta: {
-                      [ImageComponent.DESCRIPTION]: description,
-                    },
-                  });
-                }}
                 onChange={({ target }) => setDescription(target.value)}
                 style={styles.metaModalTextarea} />
             </div>
             <div style={isLinkModalShown ? styles.linkEditorShown : styles.linkEditor}>
               <h6 style={styles.metaModalTitle}>Link</h6>
+              <button
+                onClick={() => setLinkTarget(!linkTarget)}
+                style={styles.linkTargetButton}
+                type="button">
+                <span style={styles.checkboxWrapper}>
+                  {linkTarget ? null : (
+                    <span style={styles.checkboxChecked} />
+                  )}
+                </span>
+                Open new window
+              </button>
+              <button
+                onClick={() => toggleLinkModalShown(false)}
+                style={styles.removeBtn}
+                type="button">
+                <span style={styles.removeBtnLine1} />
+                <span style={styles.removeBtnLine2} />
+              </button>
               <input
                 type="text"
                 ref={linkTextInput}
                 value={linkURL}
                 placeholder="https://"
-                onBlur={() => {
-                  toggleLinkModalShown(false);
-
-                  dispatch({
-                    type: Actions.SET_METADATA,
-                    id,
-                    meta: {
-                      [ImageComponent.LINK]: linkURL,
-                    },
-                  });
-                }}
                 onChange={({ target }) => setLinkURL(target.value)}
                 style={styles.metaModalInput} />
             </div>

@@ -284,7 +284,7 @@ function ImageComponent({
   const [description, setDescription] = useState(meta[ImageComponent.DESCRIPTION]);
   const [isLinkModalShown, toggleLinkModalShown] = useState(false);
   const [linkURL, setLinkURL] = useState(meta[ImageComponent.LINK]);
-  const [linkTarget, setLinkTarget] = useState(meta[ImageComponent.LINK_TARGET]);
+  const [linkSelf, setLinkSelf] = useState(meta[ImageComponent.LINK_SELF]);
 
   // Draw on canvas
   function draw(image) {
@@ -412,7 +412,7 @@ function ImageComponent({
         id,
         meta: {
           [ImageComponent.LINK]: linkURL,
-          [ImageComponent.LINK_TARGET]: linkTarget,
+          [ImageComponent.LINK_SELF]: linkSelf,
         },
       });
 
@@ -458,7 +458,7 @@ function ImageComponent({
                 <a
                   href={linkURL}
                   style={styles.activeLink}
-                  target={linkTarget ? '_self' : '_blank'}>
+                  target={linkSelf ? '_self' : '_blank'}>
                   <Icons.LINK fill="#777" />
                 </a>
               ) : null}
@@ -512,11 +512,11 @@ function ImageComponent({
             <div style={isLinkModalShown ? styles.linkEditorShown : styles.linkEditor}>
               <h6 style={styles.metaModalTitle}>Link</h6>
               <button
-                onClick={() => setLinkTarget(!linkTarget)}
+                onClick={() => setLinkSelf(!linkSelf)}
                 style={styles.linkTargetButton}
                 type="button">
                 <span style={styles.checkboxWrapper}>
-                  {linkTarget ? null : (
+                  {linkSelf ? null : (
                     <span style={styles.checkboxChecked} />
                   )}
                 </span>
@@ -553,6 +553,6 @@ ImageComponent.DESCRIPTION = 'DESCRIPTION';
 
 ImageComponent.LINK = 'LINK';
 
-ImageComponent.LINK_TARGET = 'LINK_TARGET';
+ImageComponent.LINK_SELF = 'LINK_SELF';
 
 export default ImageComponent;

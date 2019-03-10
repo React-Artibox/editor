@@ -19,9 +19,9 @@ const defaultOptions = {
   availableTypes: [
     BlockTypes.IMAGE,
     BlockTypes.YOUTUBE,
-    BlockTypes.SLIDESHOW,
-    BlockTypes.INSTAGRAM,
-    BlockTypes.FACEBOOK,
+    // BlockTypes.SLIDESHOW,
+    // BlockTypes.INSTAGRAM,
+    // BlockTypes.FACEBOOK,
   ],
 };
 

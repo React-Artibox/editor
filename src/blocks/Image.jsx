@@ -9,6 +9,7 @@ import {
   Dispatch as DispatchContext,
 } from '../constants/context';
 import isURL from '../helpers/url';
+import Aligns from '../constants/aligns';
 
 const baseStyles = {
   metaEditor: {
@@ -264,6 +265,57 @@ const styles = {
   },
 };
 
+function getAlignIcon(align, menuHover) {
+  switch (align) {
+    case Aligns.RIGHT:
+      return <Icons.ALIGN_RIGHT fill={menuHover ? '#242424' : '#DBDBDB'} />
+
+    case Aligns.CENTER:
+      return <Icons.ALIGN_CENTER fill={menuHover ? '#242424' : '#DBDBDB'} />
+
+    case Aligns.LEFT:
+    default:
+      return <Icons.ALIGN_LEFT fill={menuHover ? '#242424' : '#DBDBDB'} />
+  }
+}
+
+function setNextAlign(align, setAlign) {
+  switch (align) {
+    case Aligns.RIGHT:
+      return () => setAlign(Aligns.LEFT);
+
+    case Aligns.CENTER:
+      return () => setAlign(Aligns.RIGHT);
+
+    case Aligns.LEFT:
+    default:
+      return () => setAlign(Aligns.CENTER);
+  }
+}
+
+function getAlignedStyle(align, style) {
+  switch (align) {
+    case Aligns.RIGHT:
+      return {
+        ...style,
+        alignItems: 'flex-end',
+      };
+
+    case Aligns.CENTER:
+      return {
+        ...style,
+        alignItems: 'center',
+      };
+
+    case Aligns.LEFT:
+    default:
+      return {
+        ...style,
+        alignItems: 'flex-start',
+      };
+  }
+}
+
 function ImageComponent({
   content,
   id,
@@ -285,6 +337,7 @@ function ImageComponent({
   const [isLinkModalShown, toggleLinkModalShown] = useState(false);
   const [linkURL, setLinkURL] = useState(meta[ImageComponent.LINK]);
   const [linkSelf, setLinkSelf] = useState(meta[ImageComponent.LINK_SELF]);
+  const [align, setAlign] = useState(meta[ImageComponent.ALIGN]);
 
   // Draw on canvas
   function draw(image) {
@@ -428,7 +481,7 @@ function ImageComponent({
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
-      <div ref={container} style={styles.mainContent}>
+      <div ref={container} style={getAlignedStyle(align, styles.mainContent)}>
         <textarea
           autoFocus
           onInput={e => e.preventDefault()}
@@ -488,10 +541,11 @@ function ImageComponent({
                 <Icons.LINK fill={menuHover || isURL(linkURL) ? '#242424' : '#DBDBDB'} />
               </button>
               <button
+                onClick={setNextAlign(align, setAlign)}
                 className="artibox-tooltip-btn"
                 style={styles.imageMenuBtn}
                 type="button">
-                <Icons.ALIGN_LEFT fill={menuHover ? '#242424' : '#DBDBDB'} />
+                {getAlignIcon(align, menuHover)}
               </button>
             </div>
             <div style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
@@ -554,5 +608,7 @@ ImageComponent.DESCRIPTION = 'DESCRIPTION';
 ImageComponent.LINK = 'LINK';
 
 ImageComponent.LINK_SELF = 'LINK_SELF';
+
+ImageComponent.ALIGN = 'ALIGN';
 
 export default ImageComponent;

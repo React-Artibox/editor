@@ -3,6 +3,7 @@
 import React, { Fragment } from 'react';
 import { Config as ConfigContext } from './constants/context';
 import { fileToBase64URL } from './parsers/image';
+import BlockTypes from './constants/blockTypes';
 
 type Props = {
   children: any,
@@ -15,6 +16,13 @@ type Props = {
 const defaultOptions = {
   parseImageFile: fileToBase64URL,
   parseImageURL: null,
+  availableTypes: [
+    BlockTypes.IMAGE,
+    BlockTypes.VIDEO,
+    BlockTypes.SLIDESHOW,
+    BlockTypes.INSTAGRAM,
+    BlockTypes.FACEBOOK,
+  ],
 };
 
 function ArtiboxProvider({

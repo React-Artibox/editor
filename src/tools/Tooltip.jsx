@@ -107,10 +107,11 @@ function Tooltip({
 }: Props) {
   const [isHover, setHover] = useState(false);
   const [progress, setProgress] = useState(null);
-  const { parseImageFile } = useContext(ConfigContext);
+  const {
+    parseImageFile,
+    availableTypes,
+  } = useContext(ConfigContext);
   const dispatch = useContext(DispatchContext);
-
-  console.log('progress', progress);
 
   return (
     <Fragment>
@@ -137,58 +138,68 @@ function Tooltip({
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         style={styles.wrapper}>
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.PHOTO fill={isHover ? '#242424' : '#DBDBDB'} />
-          <input
-            onChange={async ({ target: { files }}) => {
-              if (files && files.length) {
-                const emitter = new EventEmitter();
+        {~availableTypes.indexOf(BlockTypes.IMAGE) ? (
+          <button
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.PHOTO fill={isHover ? '#242424' : '#DBDBDB'} />
+            <input
+              onChange={async ({ target: { files }}) => {
+                if (files && files.length) {
+                  const emitter = new EventEmitter();
 
-                emitter.on(Progress.START, () => setProgress(0));
-                emitter.on(Progress.PROGRESS, progress => setProgress(progress));
-                emitter.on(Progress.END, () => setProgress(null));
+                  emitter.on(Progress.START, () => setProgress(0));
+                  emitter.on(Progress.PROGRESS, progress => setProgress(progress));
+                  emitter.on(Progress.END, () => setProgress(null));
 
-                const url = await parseImageFile(files[0], emitter);
+                  const url = await parseImageFile(files[0], emitter);
 
-                dispatch({
-                  type: Actions.CHANGE_TYPE,
-                  id: blockId,
-                  newType: BlockTypes.IMAGE,
-                  content: url,
-                });
-              }
-            }}
-            style={styles.imagePicker}
-            type="file"
-            accept="image/*" />
-        </button>
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.SLIDER fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.VIDEO fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.INSTAGRAM fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.FACEBOOK fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
+                  dispatch({
+                    type: Actions.CHANGE_TYPE,
+                    id: blockId,
+                    newType: BlockTypes.IMAGE,
+                    content: url,
+                  });
+                }
+              }}
+              style={styles.imagePicker}
+              type="file"
+              accept="image/*" />
+          </button>
+        ) : null}
+        {~availableTypes.indexOf(BlockTypes.SLIDESHOW) ? (
+          <button
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.SLIDER fill={isHover ? '#242424' : '#DBDBDB'} />
+          </button>
+        ) : null}
+        {~availableTypes.indexOf(BlockTypes.VIDEO) ? (
+          <button
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.VIDEO fill={isHover ? '#242424' : '#DBDBDB'} />
+          </button>
+        ) : null}
+        {~availableTypes.indexOf(BlockTypes.INSTAGRAM) ? (
+          <button
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.INSTAGRAM fill={isHover ? '#242424' : '#DBDBDB'} />
+          </button>
+        ) : null}
+        {~availableTypes.indexOf(BlockTypes.FACEBOOK) ? (
+          <button
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.FACEBOOK fill={isHover ? '#242424' : '#DBDBDB'} />
+          </button>
+        ) : null}
       </div>
     </Fragment>
   );

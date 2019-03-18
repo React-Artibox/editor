@@ -23,11 +23,9 @@ const artiboxOptions = {
 
 function SimpleForm() {
   return (
-    <ArtiboxProvider
-      options={artiboxOptions}>
+    <ArtiboxProvider options={artiboxOptions}>
       <div>
-        <Editor
-          onChange={content => console.log('Editor Content', content)} />
+        <Editor onChange={content => console.log('Editor Content', content)} />
       </div>
     </ArtiboxProvider>
   );
@@ -51,7 +49,7 @@ function SimpleForm() {
       <form>
       	 <Field
       	   name="content"
-		   component={reduxFormEditor} />
+           component={reduxFormEditor} />
       </form>
     </ArtiboxProvider>
   );

@@ -8,6 +8,7 @@ import {
   Editor,
   createFileUploader,
   BlockTypes,
+  toJSON,
 } from '../src/index';
 
 const styles = {
@@ -32,7 +33,7 @@ function SimpleEditor() {
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,
       }}>
       <div style={styles.wrapper}>
-        <Editor onChange={(state) => console.log('HELLO', state)} />
+        <Editor onChange={(state) => console.log('HELLO', toJSON(state))} />
       </div>
     </ArtiboxProvider>
   );

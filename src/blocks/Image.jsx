@@ -497,6 +497,8 @@ function ImageComponent({
       <div ref={container} style={getAlignedStyle(align, styles.mainContent)}>
         <textarea
           autoFocus
+          value=""
+          onChange={e => e.preventDefault()}
           onInput={e => e.preventDefault()}
           className="artibox-input"
           style={styles.input}
@@ -572,7 +574,7 @@ function ImageComponent({
               </button>
               <textarea
                 ref={descriptionTextarea}
-                value={description}
+                value={description || ''}
                 onChange={({ target }) => setDescription(target.value)}
                 style={styles.metaModalTextarea} />
             </div>
@@ -599,7 +601,7 @@ function ImageComponent({
               <input
                 type="text"
                 ref={linkTextInput}
-                value={linkURL}
+                value={linkURL || ''}
                 placeholder="https://"
                 onChange={({ target }) => setLinkURL(target.value)}
                 style={styles.metaModalInput} />

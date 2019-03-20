@@ -7,6 +7,7 @@ import ALIGNS, { ALIGN_NAMES } from '../constants/aligns';
 export function toJSON(storedObject = {}) {
   return {
     blocks: storedObject.blocks.map(block => ({
+      id: block.id,
       type: BLOCK_NAMES[block.type],
       content: block.content,
       meta: {

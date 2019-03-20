@@ -82,6 +82,7 @@ const styles = {
     left: 0,
     height: '100%',
     backgroundColor: 'transparent',
+    zIndex: 10,
   },
   placeholder: {
     width: '100%',
@@ -199,6 +200,7 @@ const styles = {
   },
   canvasWrapper: {
     position: 'relative',
+    zIndex: 5,
   },
   linkTargetButton: {
     position: 'absolute',

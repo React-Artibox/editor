@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Editor from '../Editor';
+import { toJSON } from '../helpers/json';
 
 function ReduxFormWrapper({
   input: {
@@ -12,7 +13,9 @@ function ReduxFormWrapper({
   if (!value) return null;
 
   return (
-    <Editor initialValues={value} onChange={onChange} />
+    <Editor
+      initialValues={value}
+      onChange={data => onChange(toJSON(data))} />
   );
 }
 

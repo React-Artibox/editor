@@ -6,6 +6,7 @@ import './main.css';
 import BlockTypes from './constants/blockTypes';
 import Actions from './constants/actions';
 import { Dispatch as DispatchContext } from './constants/context';
+import { fromJSON } from './helpers/json';
 
 // Blocks
 import Text from './blocks/Text';
@@ -222,7 +223,7 @@ function Editor({
 }) {
   if (typeof onChange !== 'function') throw new Error('Please pass onChange function to get data update.');
 
-  const [state, dispatch] = useReducer(reducer, initialValues, initializer);
+  const [state, dispatch] = useReducer(reducer, fromJSON(initialValues), initializer);
   const container = useRef();
   const [isYouTubeAPILoaded, setYouTubeAPILoaded] = useState(false);
 

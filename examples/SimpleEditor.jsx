@@ -9,6 +9,7 @@ import {
   createFileUploader,
   BlockTypes,
   toJSON,
+  fromJSON,
 } from '../src/index';
 
 const styles = {
@@ -33,7 +34,21 @@ function SimpleEditor() {
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,
       }}>
       <div style={styles.wrapper}>
-        <Editor onChange={(state) => console.log('HELLO', toJSON(state))} />
+        <Editor
+          initialValues={{
+            blocks: [{
+              type: 'IMAGE',
+              content: 'd3c23e501f4e31f21e2a8345a87c60c6.png',
+              meta: {
+                ALIGN: 'CENTER',
+                DESCRIPTION: 'Hello 你好嗎',
+              },
+            }, {
+              type: 'TEXT',
+              content: 'Hahah',
+            }],
+          }}
+          onChange={(state) => console.log('HELLO', state, toJSON(state))} />
       </div>
     </ArtiboxProvider>
   );

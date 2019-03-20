@@ -76,3 +76,7 @@ With parseImageFile function, when image block shown, the block viewer will call
 - createFileUploader(targetURL: string, done: Function, fieldKey?: string = 'files', method?: string = 'POST') => Function
 
 You can use this helper to create HTTP formdata/multipart POST easier. This function will return a proper function for parseImageFile.
+
+- toJSON(storedValue: { blocks: Array<BlockType> })
+
+You can use this function to transform value into json can be stringified.

@@ -35,6 +35,9 @@ function SimpleEditor() {
     }, {
       type: 'TEXT',
       content: 'Hahah',
+    }, {
+      type: 'YOUTUBE',
+      content: 'nDTUg4R4dxk',
     }],
   });
 

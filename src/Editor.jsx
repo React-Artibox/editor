@@ -225,7 +225,7 @@ function Editor({
 
   const [state, dispatch] = useReducer(reducer, fromJSON(initialValues), initializer);
   const container = useRef();
-  const [isYouTubeAPILoaded, setYouTubeAPILoaded] = useState(false);
+  const [isYouTubeAPILoaded, setYouTubeAPILoaded] = useState(typeof YT !== 'undefined');
 
   const prevState = usePreviousState(state);
 

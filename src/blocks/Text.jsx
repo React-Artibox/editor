@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Actions from '../constants/actions';
 import Tooltip from '../tools/Tooltip';
 import { Dispatch as DispatchContext } from '../constants/context';
@@ -63,11 +63,25 @@ function Text({
   focus,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
+  const textarea = useRef();
+
+  useEffect(() => {
+    const { current } = textarea;
+
+    if (current) {
+      current.style.height = '26px';
+
+      const newHeight = `${current.scrollHeight}px`;
+      current.style.height = newHeight;
+      current.parentNode.parentNode.style.height = newHeight;
+    }
+  }, [textarea]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div style={styles.mainContent}>
         <textarea
+          ref={textarea}
           autoFocus
           onFocus={() => dispatch({
             type: Actions.FOCUS,

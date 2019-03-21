@@ -1,7 +1,7 @@
 // @flow
 /* eslint import/no-extraneous-dependencies: 0 */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { hot } from 'react-hot-loader';
 import {
   ArtiboxProvider,
@@ -23,6 +23,21 @@ const styles = {
 };
 
 function SimpleEditor() {
+  const [shown, setShown] = useState(true);
+  const [data, setData] = useState({
+    blocks: [{
+      type: 'IMAGE',
+      content: 'd3c23e501f4e31f21e2a8345a87c60c6.png',
+      meta: {
+        ALIGN: 'CENTER',
+        DESCRIPTION: 'Hello 你好嗎',
+      },
+    }, {
+      type: 'TEXT',
+      content: 'Hahah',
+    }],
+  });
+
   return (
     <ArtiboxProvider
       options={{
@@ -34,21 +49,20 @@ function SimpleEditor() {
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,
       }}>
       <div style={styles.wrapper}>
-        <Editor
-          initialValues={{
-            blocks: [{
-              type: 'IMAGE',
-              content: 'd3c23e501f4e31f21e2a8345a87c60c6.png',
-              meta: {
-                ALIGN: 'CENTER',
-                DESCRIPTION: 'Hello 你好嗎',
-              },
-            }, {
-              type: 'TEXT',
-              content: 'Hahah',
-            }],
-          }}
-          onChange={(state) => console.log('HELLO', state, toJSON(state))} />
+        <button
+          onClick={() => setShown(!shown)}
+          type="button">
+          Toggle
+        </button>
+        {shown ? (
+          <Editor
+            initialValues={data}
+            onChange={(state) => {
+              console.log('HELLO', state, toJSON(state));
+
+              setData(toJSON(state));
+            }} />
+        ) : null}
       </div>
     </ArtiboxProvider>
   );

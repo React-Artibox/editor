@@ -45,6 +45,8 @@ function SimpleEditor() {
     <ArtiboxProvider
       options={{
         availableTypes: [
+          BlockTypes.SUBTITLE,
+          BlockTypes.QUOTE,
           BlockTypes.IMAGE,
           BlockTypes.YOUTUBE,
         ],

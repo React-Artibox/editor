@@ -90,7 +90,7 @@ function reducer(state, action) {
             {
               ...state.blocks[updateIndex],
               type: action.newType,
-              content: action.content,
+              content: action.content || state.blocks[updateIndex].content,
             },
             ...state.blocks.slice(updateIndex + 1),
           ],
@@ -280,6 +280,9 @@ function Editor({
               ) : null;
 
             case BlockTypes.TEXT:
+            case BlockTypes.TITLE:
+            case BlockTypes.SUBTITLE:
+            case BlockTypes.QUOTE:
               return (
                 <Text
                   {...block}

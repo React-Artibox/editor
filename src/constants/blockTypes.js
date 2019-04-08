@@ -2,6 +2,7 @@
 
 const BLOCK_TYPES = {
   TEXT: Symbol('Artibox/Block/TEXT'),
+  QUOTE: Symbol('Artibox/Block/QUOTE'),
   TITLE: Symbol('Artibox/Block/TITLE'),
   SUBTITLE: Symbol('Artibox/Block/SUBTITLE'),
   IMAGE: Symbol('Artibox/Block/IMAGE'),
@@ -13,6 +14,7 @@ const BLOCK_TYPES = {
 
 export const BLOCK_NAMES = {
   [BLOCK_TYPES.TEXT]: 'TEXT',
+  [BLOCK_TYPES.QUOTE]: 'QUOTE',
   [BLOCK_TYPES.TITLE]: 'TITLE',
   [BLOCK_TYPES.SUBTITLE]: 'SUBTITLE',
   [BLOCK_TYPES.IMAGE]: 'IMAGE',

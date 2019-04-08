@@ -2,7 +2,6 @@
 
 import React, { Fragment, useContext, useState, useRef, useEffect } from 'react';
 import Actions from '../constants/actions';
-import Tooltip from '../tools/Tooltip';
 import Icons from '../constants/icons';
 import {
   Config as ConfigContext,

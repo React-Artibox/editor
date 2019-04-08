@@ -49,6 +49,7 @@ function YouTube({
   content,
   id,
   focus,
+  firstLoaded,
 }: BlockProps) {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
@@ -89,11 +90,23 @@ function YouTube({
     }
   });
 
+  useEffect(() => {
+    const { current } = container;
+
+    if (current && firstLoaded) {
+      current.querySelector('.artibox-input').focus();
+    }
+
+    dispatch({
+      type: Actions.LOADED,
+      id,
+    });
+  }, []);
+
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div ref={container} style={styles.container}>
         <textarea
-          autoFocus
           onInput={e => e.preventDefault()}
           className="artibox-input"
           style={styles.input}

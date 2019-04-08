@@ -37,25 +37,49 @@ const styles = {
   },
 };
 
-function initializer(initialValues = { blocks: [] }) {
-  const lastIndex = initialValues.blocks.length - 1;
+function initializer(autoFocus = false) {
+  return (initialValues = { blocks: [] }) => {
+    const lastIndex = initialValues.blocks.length - 1;
 
-  return {
-    ...initialValues,
-    blocks: [
-      ...initialValues.blocks.map((block, index) => index === lastIndex ? {
-        ...block,
-        focus: true,
-      } : {
-        ...block,
-        focus: false,
-      }),
-    ],
+    return {
+      ...initialValues,
+      blocks: [
+        ...initialValues.blocks.map((block, index) => index === lastIndex ? {
+          ...block,
+          focus: autoFocus,
+          loaded: false,
+        } : {
+          ...block,
+          focus: false,
+          loaded: false,
+        }),
+      ],
+    };
   };
 }
 
 function reducer(state, action) {
   switch (action.type) {
+    case Actions.LOADED: {
+      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
+
+      if (~updateIndex) {
+        return {
+          ...state,
+          blocks: [
+            ...state.blocks.slice(0, updateIndex),
+            {
+              ...state.blocks[updateIndex],
+              loaded: true,
+            },
+            ...state.blocks.slice(updateIndex + 1),
+          ],
+        };
+      }
+
+      return state;
+    }
+
     case Actions.SET_METADATA: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
@@ -198,6 +222,7 @@ function reducer(state, action) {
             content: '',
             focus: true,
             meta: {},
+            loaded: true,
           },
         ],
       };
@@ -220,12 +245,14 @@ function usePreviousState(value) {
 function Editor({
   initialValues,
   onChange,
+  autoFocus,
 }) {
   if (typeof onChange !== 'function') throw new Error('Please pass onChange function to get data update.');
 
-  const [state, dispatch] = useReducer(reducer, fromJSON(initialValues), initializer);
+  const [state, dispatch] = useReducer(reducer, fromJSON(initialValues), initializer(autoFocus));
   const container = useRef();
   const [isYouTubeAPILoaded, setYouTubeAPILoaded] = useState(typeof YT !== 'undefined');
+  const [firstLoaded, setFirstLoaded] = useState(false);
 
   const prevState = usePreviousState(state);
 
@@ -242,9 +269,7 @@ function Editor({
 
         const inputs = current.querySelectorAll('.artibox-input');
 
-        if (removedIndex === 0) {
-          inputs[0].focus();
-        } else {
+        if (removedIndex !== 0) {
           inputs[removedIndex - 1].focus();
         }
       }
@@ -265,6 +290,10 @@ function Editor({
     }
 
     onChange(state);
+
+    if (state.blocks.every(block => block.loaded) && !firstLoaded) {
+      setFirstLoaded(true);
+    }
   }, [state]);
 
   return (
@@ -276,6 +305,7 @@ function Editor({
               return isYouTubeAPILoaded ? (
                 <YouTube
                   {...block}
+                  firstLoaded={firstLoaded}
                   key={block.id} />
               ) : null;
 
@@ -286,6 +316,7 @@ function Editor({
               return (
                 <Text
                   {...block}
+                  firstLoaded={firstLoaded}
                   key={block.id} />
               );
 
@@ -293,6 +324,7 @@ function Editor({
               return (
                 <Image
                   {...block}
+                  firstLoaded={firstLoaded}
                   key={block.id} />
               );
 
@@ -327,5 +359,9 @@ function Editor({
     </DispatchContext.Provider>
   );
 }
+
+Editor.defaultProps = {
+  autoFocus: false,
+};
 
 export default Editor;

@@ -105,6 +105,7 @@ function Text({
   id,
   type,
   focus,
+  firstLoaded,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
   const textarea = useRef();
@@ -133,6 +134,19 @@ function Text({
     }
   }, [type]);
 
+  useEffect(() => {
+    const { current } = textarea;
+
+    if (current && firstLoaded) {
+      current.focus();
+    }
+
+    dispatch({
+      type: Actions.LOADED,
+      id,
+    });
+  }, []);
+
   return (
     <div
       style={{
@@ -144,7 +158,6 @@ function Text({
       <div style={type === BlockTypes.QUOTE ? styles.mainContentQuote : styles.mainContent}>
         <textarea
           ref={textarea}
-          autoFocus
           onFocus={() => dispatch({
             type: Actions.FOCUS,
             id,

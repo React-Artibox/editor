@@ -322,6 +322,7 @@ function ImageComponent({
   id,
   focus,
   meta,
+  firstLoaded,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
   const { parseImageURL } = useContext(ConfigContext);
@@ -419,7 +420,7 @@ function ImageComponent({
 
       const { current } = descriptionTextarea;
 
-      if (current) {
+      if (current && firstLoaded) {
         current.focus();
       }
     } else {
@@ -433,7 +434,7 @@ function ImageComponent({
         },
       });
 
-      if (current) {
+      if (current && firstLoaded) {
         const textarea = current.querySelector('.artibox-input');
 
         if (textarea) {
@@ -455,7 +456,7 @@ function ImageComponent({
 
       const { current } = linkTextInput;
 
-      if (current) {
+      if (current && firstLoaded) {
         current.focus();
       }
     } else {
@@ -470,7 +471,7 @@ function ImageComponent({
         },
       });
 
-      if (current) {
+      if (current && firstLoaded) {
         const textarea = current.querySelector('.artibox-input');
 
         if (textarea) {
@@ -491,11 +492,23 @@ function ImageComponent({
     });
   }, [align]);
 
+  useEffect(() => {
+    const { current } = container;
+
+    if (current && firstLoaded) {
+      current.querySelector('.artibox-input').focus();
+    }
+
+    dispatch({
+      type: Actions.LOADED,
+      id,
+    });
+  }, []);
+
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div ref={container} style={getAlignedStyle(align, styles.mainContent)}>
         <textarea
-          autoFocus
           value=""
           onChange={e => e.preventDefault()}
           onInput={e => e.preventDefault()}

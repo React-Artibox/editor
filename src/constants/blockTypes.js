@@ -1,6 +1,7 @@
 // @flow
 
 const BLOCK_TYPES = {
+  LINE: Symbol('Artibox/Block/LINE'),
   TEXT: Symbol('Artibox/Block/TEXT'),
   QUOTE: Symbol('Artibox/Block/QUOTE'),
   TITLE: Symbol('Artibox/Block/TITLE'),
@@ -13,6 +14,7 @@ const BLOCK_TYPES = {
 };
 
 export const BLOCK_NAMES = {
+  [BLOCK_TYPES.LINE]: 'LINE',
   [BLOCK_TYPES.TEXT]: 'TEXT',
   [BLOCK_TYPES.QUOTE]: 'QUOTE',
   [BLOCK_TYPES.TITLE]: 'TITLE',

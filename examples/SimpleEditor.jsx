@@ -49,6 +49,7 @@ function SimpleEditor() {
           BlockTypes.QUOTE,
           BlockTypes.IMAGE,
           BlockTypes.YOUTUBE,
+          BlockTypes.LINE,
         ],
         parseImageFile: createFileUploader('http://sample.rytass.com/uploader/files', files => files[0]),
         parseImageURL: file => `http://sample.rytass.com/uploads/${file}`,

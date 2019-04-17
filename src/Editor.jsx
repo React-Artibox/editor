@@ -12,6 +12,7 @@ import { fromJSON } from './helpers/json';
 import Text from './blocks/Text';
 import Image from './blocks/Image';
 import YouTube from './blocks/YouTube';
+import Line from './blocks/Line';
 
 const styles = {
   wrapper: {
@@ -114,7 +115,9 @@ function reducer(state, action) {
             {
               ...state.blocks[updateIndex],
               type: action.newType,
-              content: action.content || state.blocks[updateIndex].content,
+              content: action.newType === BlockTypes.LINE ? '' : (
+                action.content || state.blocks[updateIndex].content
+              ),
             },
             ...state.blocks.slice(updateIndex + 1),
           ],
@@ -301,6 +304,14 @@ function Editor({
       <div ref={container} style={styles.wrapper}>
         {state.blocks.map((block) => {
           switch (block.type) {
+            case BlockTypes.LINE:
+              return (
+                <Line
+                  {...block}
+                  firstLoaded={firstLoaded}
+                  key={block.id} />
+              );
+
             case BlockTypes.YOUTUBE:
               return isYouTubeAPILoaded ? (
                 <YouTube
@@ -337,7 +348,12 @@ function Editor({
           onMouseDown={(e) => {
             e.preventDefault();
 
-            if (!state.blocks.length || !!state.blocks[state.blocks.length - 1].content) {
+            const lastBlock = state.blocks.length && state.blocks[state.blocks.length - 1];
+
+            if (lastBlock
+              && (
+                lastBlock.type === BlockTypes.LINE ? true : !!lastBlock.content
+              )) {
               dispatch({ type: Actions.NEW_LINE });
             } else if (document.activeElement === document.body) {
               const allInputs = document.querySelectorAll('.artibox-input');

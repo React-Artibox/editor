@@ -7,6 +7,15 @@ type Props = {
 };
 
 export default {
+  LINE: ({ fill }: Props) => (
+    <svg width="24" height="24" viewBox="0 0 24 24">
+      <path
+        fillRule="evenodd"
+        stroke={fill}
+        strokeWidth="2"
+        d="M3.224,12 L20.816,12" />
+    </svg>
+  ),
   QUOTE: ({ fill }: Props) => (
     <svg width="24" height="24" viewBox="0 0 24 24">
       <path

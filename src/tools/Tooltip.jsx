@@ -318,6 +318,19 @@ function Tooltip({
             <Icons.QUOTE fill={type === BlockTypes.QUOTE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
           </button>
         ) : null}
+        {~availableTypes.indexOf(BlockTypes.LINE) ? (
+          <button
+            onClick={() => dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.LINE,
+            })}
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.LINE fill={type === BlockTypes.LINE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+          </button>
+        ) : null}
         {!hasContent ? (
           <Fragment>
             <span style={styles.spliter} />

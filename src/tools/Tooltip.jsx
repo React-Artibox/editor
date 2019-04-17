@@ -195,6 +195,13 @@ type Props = {
   type: Symbol,
 };
 
+const LEFT_TYPES = [
+  BlockTypes.TITLE,
+  BlockTypes.SUBTITLE,
+  BlockTypes.QUOTE,
+  BlockTypes.LINE,
+];
+
 function Tooltip({
   blockId,
   hasContent,
@@ -257,25 +264,27 @@ function Tooltip({
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         style={styles.wrapper}>
-        <button
-          onClick={() => type === BlockTypes.TITLE ? (
-            dispatch({
-              type: Actions.CHANGE_TYPE,
-              id: blockId,
-              newType: BlockTypes.TEXT,
-            })
-          ) : (
-            dispatch({
-              type: Actions.CHANGE_TYPE,
-              id: blockId,
-              newType: BlockTypes.TITLE,
-            })
-          )}
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.TITLE fill={type === BlockTypes.TITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
-        </button>
+        {~availableTypes.indexOf(BlockTypes.TITLE) ? (
+          <button
+            onClick={() => type === BlockTypes.TITLE ? (
+              dispatch({
+                type: Actions.CHANGE_TYPE,
+                id: blockId,
+                newType: BlockTypes.TEXT,
+              })
+            ) : (
+              dispatch({
+                type: Actions.CHANGE_TYPE,
+                id: blockId,
+                newType: BlockTypes.TITLE,
+              })
+            )}
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.TITLE fill={type === BlockTypes.TITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+          </button>
+        ) : null}
         {~availableTypes.indexOf(BlockTypes.SUBTITLE) ? (
           <button
             onClick={() => type === BlockTypes.SUBTITLE ? (
@@ -333,7 +342,9 @@ function Tooltip({
         ) : null}
         {!hasContent ? (
           <Fragment>
-            <span style={styles.spliter} />
+            {LEFT_TYPES.some(type => ~availableTypes.indexOf(type)) ? (
+              <span style={styles.spliter} />
+            ) : null}
             {~availableTypes.indexOf(BlockTypes.IMAGE) ? (
               <button
                 className="artibox-tooltip-btn"

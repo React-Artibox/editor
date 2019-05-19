@@ -62,7 +62,9 @@ function SimpleEditor() {
         </button>
         {shown ? (
           <Editor
-            initialValues={data}
+            initialValues={{
+              blocks: [],
+            }}
             onChange={(state) => {
               console.log('HELLO', state, toJSON(state));
 

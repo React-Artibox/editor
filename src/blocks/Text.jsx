@@ -162,8 +162,21 @@ function Text({
             type: Actions.FOCUS,
             id,
           })}
-          onKeyDown={({ which }) => {
+          onKeyDown={(e) => {
+            const { which, shiftKey } = e;
+
             switch (which) {
+              case 13:
+                if (shiftKey) break;
+
+                e.preventDefault();
+
+                dispatch({
+                  type: Actions.NEW_LINE,
+                  at: id,
+                });
+                break;
+
               case 8:
                 if (content === '') {
                   dispatch({

@@ -212,6 +212,34 @@ function reducer(state, action) {
     }
 
     case Actions.NEW_LINE:
+      if (action.at) {
+        const targetIndex = state.blocks.findIndex(block => block.id === action.at);
+
+        if (~targetIndex) {
+          return {
+            ...state,
+            blocks: [
+              ...state.blocks.slice(0, targetIndex + 1).map(block => block.focus ? {
+                ...block,
+                focus: false,
+              } : block),
+              {
+                id: uuid(),
+                type: BlockTypes.TEXT,
+                content: '',
+                focus: true,
+                meta: {},
+                loaded: true,
+              },
+              ...state.blocks.slice(targetIndex + 1).map(block => block.focus ? {
+                ...block,
+                focus: false,
+              } : block),
+            ],
+          };
+        }
+      }
+
       return {
         ...state,
         blocks: [
@@ -350,10 +378,10 @@ function Editor({
 
             const lastBlock = state.blocks.length && state.blocks[state.blocks.length - 1];
 
-            if (lastBlock
+            if (!lastBlock || (lastBlock
               && (
                 lastBlock.type === BlockTypes.LINE ? true : !!lastBlock.content
-              )) {
+              ))) {
               dispatch({ type: Actions.NEW_LINE });
             } else if (document.activeElement === document.body) {
               const allInputs = document.querySelectorAll('.artibox-input');

@@ -1,6 +1,6 @@
 {
   "name": "@artibox/editor",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Artibox Editor",
   "main": "lib/index.js",
   "scripts": {

@@ -108,23 +108,6 @@ function reducer(state, action) {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
       if (~updateIndex) {
-        let wrapAction = action.tag || null;
-        const wrapTags = state.blocks[updateIndex].meta.tags || [];
-        const newTags = wrapTags.map((t) => {
-          if (wrapAction && t.from === wrapAction.from && t.to === wrapAction.to) {
-            const newTag = {
-              ...t,
-              ...wrapAction,
-            };
-
-            wrapAction = null;
-
-            return newTag;
-          }
-
-          return t;
-        });
-
         return {
           ...state,
           blocks: [
@@ -133,10 +116,7 @@ function reducer(state, action) {
               ...state.blocks[updateIndex],
               meta: {
                 ...state.blocks[updateIndex].meta,
-                tags: wrapAction ? [
-                  ...newTags,
-                  wrapAction,
-                ] : newTags,
+                tags: action.tags,
               },
             },
             ...state.blocks.slice(updateIndex + 1),

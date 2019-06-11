@@ -61,7 +61,7 @@ export function getSelectedRangeOnPreview(textarea = null, target = null) {
         break;
     }
   }
-
+  console.log(range);
   return range;
 }
 

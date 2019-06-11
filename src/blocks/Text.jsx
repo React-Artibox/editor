@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
+import TagTypes from '../constants/tags';
 import Tooltip from '../tools/Tooltip';
 import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
@@ -144,6 +145,13 @@ const styles = {
     cursor: 'pointer',
     position: 'relative',
   },
+  link: {
+    color: 'rgb(94, 106, 221)',
+    textDecoration: 'underline',
+  },
+  highlight: {
+    color: 'rgb(230, 41, 16)',
+  },
 };
 
 function Text({
@@ -200,9 +208,80 @@ function Text({
       isShown: true,
       x: (selectionX + ((width - menuWidth) / 2)) - parentX,
       y: selectionY - parentY - 40,
-      from: previewRange.startOffset,
-      to: previewRange.endOffset,
+      from: input.selectionStart,
+      to: input.selectionEnd,
     });
+  }
+
+  function wrapTags() {
+    const wrappedStrings = [];
+    const tags = (meta && meta.tags) || [];
+    if (!tags.length) return content;
+
+    let workingTagIdx = 0;
+    let nodeContent = '';
+    let concatingType = null;
+
+    Array.from(content).forEach((char, index) => {
+      if (index === tags[workingTagIdx].to) {
+        // Flush
+        switch (concatingType) {
+          case TagTypes.HIGHLIGHT:
+            wrappedStrings.push((
+              <span
+                key={workingTagIdx}
+                style={styles.highlight}>
+                {nodeContent}
+              </span>
+            ));
+
+            nodeContent = '';
+            break;
+
+          case TagTypes.LINK:
+            wrappedStrings.push((
+              <a
+                rel="noopener noreferrer"
+                href={tags[workingTagIdx].url}
+                target="_blank"
+                key={workingTagIdx}
+                style={styles.link}>
+                {nodeContent}
+              </a>
+            ));
+
+            nodeContent = '';
+            break;
+
+          default:
+            wrappedStrings.push(nodeContent);
+
+            nodeContent = '';
+            break;
+        }
+
+        if (tags[workingTagIdx + 1]) {
+          workingTagIdx += 1;
+        }
+      }
+
+      if (index === tags[workingTagIdx].from) {
+        // Flush Plain Text
+        wrappedStrings.push(nodeContent);
+        nodeContent = '';
+        concatingType = tags[workingTagIdx].type;
+      }
+
+      nodeContent = `${nodeContent}${char}`;
+    });
+
+    wrappedStrings.push(nodeContent);
+
+    return (
+      <>
+        {wrappedStrings}
+      </>
+    );
   }
 
   useEffect(() => {
@@ -319,7 +398,7 @@ function Text({
             letterSpacing: LETTER_SPACING[type],
             color: COLOR[type],
           }}>
-          {content}
+          {wrapTags()}
         </div>
         {(() => {
           if (showLinkInput) {
@@ -327,6 +406,7 @@ function Text({
               <LinkModal
                 {...menu}
                 id={id}
+                content={content}
                 firstLoaded={firstLoaded}
                 setShowLinkInput={setShowLinkInput}
                 meta={meta} />

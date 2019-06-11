@@ -8,7 +8,9 @@ import React, {
 } from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
+import DescriptionTypes from '../constants/descriptions';
 import Tooltip from '../tools/Tooltip';
+import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
 import { getSelectedRangeOnPreview } from '../helpers/range.js';
 
@@ -104,6 +106,44 @@ const styles = {
     right: 0,
     top: -7,
   },
+  textmenu: {
+    position: 'absolute',
+    zIndex: 10,
+    width: 'auto',
+    height: 36,
+    backgroundColor: '#1B2733',
+    borderRadius: 6,
+    boxShadow: '0 0 0 1px #000, 0 8px 16px rgba(27, 39, 51, 0.16)',
+    padding: 0,
+    opacity: 0,
+    transform: 'scale(1.01) translate(0, -12px)',
+    transition: 'opacity 0.12s ease-out, transform 0.08s ease-out',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
+  textmenuShown: {
+    opacity: 1,
+    pointerEvents: 'auto',
+    transform: 'scale(1) translate(0, 0)',
+  },
+  textmenuBtn: {
+    width: 24,
+    height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 8px',
+    border: 0,
+    backgroundColor: 'transparent',
+    padding: 0,
+    outline: 'none',
+    boxShadow: 'none',
+    borderRadius: 0,
+    cursor: 'pointer',
+    position: 'relative',
+  },
 };
 
 function Text({
@@ -114,16 +154,27 @@ function Text({
   firstLoaded,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
-  const [menu, setMenu] = useState(null);
+  const [menu, setMenu] = useState({
+    isShown: false,
+    x: 0,
+    y: 0,
+  });
+  const [isHover, setHover] = useState(false);
   const textarea = useRef();
   const display = useRef();
+  const textmenu = useRef();
   const onSelect = () => {
     const {
       current: input,
     } = textarea;
 
     if (input.selectionStart === input.selectionEnd) {
-      if (menu) setMenu(null);
+      if (menu && menu.isShown) {
+        setMenu({
+          ...menu,
+          isShown: false,
+        });
+      }
       return;
     }
 
@@ -137,11 +188,13 @@ function Text({
       y: selectionY,
       width,
     } = previewRange.getBoundingClientRect();
-    const menuWidth = 0;
+    const { width: menuWidth } = textmenu.current.getBoundingClientRect();
 
     setMenu({
+      ...menu,
+      isShown: true,
       x: (selectionX + ((width - menuWidth) / 2)) - parentX,
-      y: selectionY - parentY - 32,
+      y: selectionY - parentY - 40,
     });
   };
 
@@ -260,6 +313,24 @@ function Text({
             color: COLOR[type],
           }}>
           {content}
+        </div>
+        <div
+          ref={textmenu}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            ...styles.textmenu,
+            ...(menu && menu.isShown ? styles.textmenuShown : {}),
+            left: menu ? menu.x : 0,
+            top: menu ? menu.y : 0,
+          }}>
+          <button
+            onClick={() => { console.log('set link'); }}
+            className="artibox-tooltip-btn"
+            style={styles.textmenuBtn}
+            type="button">
+            <Icons.LINK fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
+          </button>
         </div>
         {focus ? (
           <div style={styles.tooltipWrapper}>

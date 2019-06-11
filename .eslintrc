@@ -15,6 +15,7 @@
     "document",
     "localStorage",
     "window",
+    "Node",
   },
   "parser": "babel-eslint",
   "extends": [

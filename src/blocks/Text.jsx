@@ -1,10 +1,16 @@
 // @flow
-
-import React, { useContext, useEffect, useRef } from 'react';
+/* eslint no-param-reassign: 0 */
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
 import Tooltip from '../tools/Tooltip';
 import { Dispatch as DispatchContext } from '../constants/context';
+import { getSelectedRangeOnPreview } from '../helpers/range.js';
 
 const BASIC_HEIGHT = {
   [BlockTypes.TEXT]: 26,
@@ -108,7 +114,36 @@ function Text({
   firstLoaded,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
+  const [menu, setMenu] = useState(null);
   const textarea = useRef();
+  const display = useRef();
+  const onSelect = () => {
+    const {
+      current: input,
+    } = textarea;
+
+    if (input.selectionStart === input.selectionEnd) {
+      if (menu) setMenu(null);
+      return;
+    }
+
+    const previewRange = getSelectedRangeOnPreview(textarea, display);
+    const {
+      x: parentX,
+      y: parentY,
+    } = input.getBoundingClientRect();
+    const {
+      x: selectionX,
+      y: selectionY,
+      width,
+    } = previewRange.getBoundingClientRect();
+    const menuWidth = 0;
+
+    setMenu({
+      x: (selectionX + ((width - menuWidth) / 2)) - parentX,
+      y: selectionY - parentY - 32,
+    });
+  };
 
   useEffect(() => {
     const { current } = textarea;
@@ -120,7 +155,7 @@ function Text({
       current.style.height = newHeight;
       current.parentNode.parentNode.style.height = newHeight;
     }
-  }, [textarea]);
+  }, [textarea, type]);
 
   useEffect(() => {
     const { current } = textarea;
@@ -145,7 +180,7 @@ function Text({
       type: Actions.LOADED,
       id,
     });
-  }, []);
+  }, [dispatch, firstLoaded, id]);
 
   return (
     <div
@@ -162,6 +197,7 @@ function Text({
             type: Actions.FOCUS,
             id,
           })}
+          onSelect={() => onSelect()}
           onKeyDown={(e) => {
             const { which, shiftKey } = e;
 
@@ -184,7 +220,7 @@ function Text({
                     id,
                   });
                 }
-
+                break;
               default:
                 break;
             }
@@ -197,7 +233,7 @@ function Text({
             target.parentNode.parentNode.style.height = newHeight;
           }}
           value={content}
-          onChange={({ target: { value }}) => dispatch({
+          onChange={({ target: { value } }) => dispatch({
             type: Actions.CHANGE,
             id,
             content: value,
@@ -214,6 +250,7 @@ function Text({
             color: COLOR[type],
           }} />
         <div
+          ref={display}
           style={{
             ...styles.display,
             fontSize: FONT_SIZE[type],

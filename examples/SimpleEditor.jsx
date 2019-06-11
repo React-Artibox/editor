@@ -63,7 +63,7 @@ function SimpleEditor() {
         {shown ? (
           <Editor
             initialValues={{
-              blocks: [],
+              blocks: data.blocks,
             }}
             onChange={(state) => {
               console.log('HELLO', state, toJSON(state));

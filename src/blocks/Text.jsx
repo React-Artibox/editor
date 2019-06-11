@@ -8,11 +8,11 @@ import React, {
 } from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
-import DescriptionTypes from '../constants/descriptions';
 import Tooltip from '../tools/Tooltip';
 import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
 import { getSelectedRangeOnPreview } from '../helpers/range.js';
+import LinkModal from '../components/LinkModal.jsx';
 
 const BASIC_HEIGHT = {
   [BlockTypes.TEXT]: 26,
@@ -112,7 +112,7 @@ const styles = {
     width: 'auto',
     height: 36,
     backgroundColor: '#1B2733',
-    borderRadius: 6,
+    borderRadius: 4,
     boxShadow: '0 0 0 1px #000, 0 8px 16px rgba(27, 39, 51, 0.16)',
     padding: 0,
     opacity: 0,
@@ -152,18 +152,23 @@ function Text({
   type,
   focus,
   firstLoaded,
+  meta,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
   const [menu, setMenu] = useState({
     isShown: false,
     x: 0,
     y: 0,
+    from: 0,
+    to: 0,
   });
   const [isHover, setHover] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const textarea = useRef();
   const display = useRef();
   const textmenu = useRef();
-  const onSelect = () => {
+  // textarea onSelect evt
+  function onSelect() {
     const {
       current: input,
     } = textarea;
@@ -195,8 +200,10 @@ function Text({
       isShown: true,
       x: (selectionX + ((width - menuWidth) / 2)) - parentX,
       y: selectionY - parentY - 40,
+      from: previewRange.startOffset,
+      to: previewRange.endOffset,
     });
-  };
+  }
 
   useEffect(() => {
     const { current } = textarea;
@@ -314,24 +321,39 @@ function Text({
           }}>
           {content}
         </div>
-        <div
-          ref={textmenu}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            ...styles.textmenu,
-            ...(menu && menu.isShown ? styles.textmenuShown : {}),
-            left: menu ? menu.x : 0,
-            top: menu ? menu.y : 0,
-          }}>
-          <button
-            onClick={() => { console.log('set link'); }}
-            className="artibox-tooltip-btn"
-            style={styles.textmenuBtn}
-            type="button">
-            <Icons.LINK fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
-          </button>
-        </div>
+        {(() => {
+          if (showLinkInput) {
+            return (
+              <LinkModal
+                {...menu}
+                id={id}
+                firstLoaded={firstLoaded}
+                setShowLinkInput={setShowLinkInput}
+                meta={meta} />
+            );
+          }
+
+          return (
+            <div
+              ref={textmenu}
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+              style={{
+                ...styles.textmenu,
+                ...(menu && menu.isShown ? styles.textmenuShown : {}),
+                left: menu ? menu.x : 0,
+                top: menu ? menu.y : 0,
+              }}>
+              <button
+                onClick={() => setShowLinkInput(true)}
+                className="artibox-tooltip-btn"
+                style={styles.textmenuBtn}
+                type="button">
+                <Icons.LINK fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
+              </button>
+            </div>
+          );
+        })()}
         {focus ? (
           <div style={styles.tooltipWrapper}>
             <Tooltip
@@ -344,5 +366,7 @@ function Text({
     </div>
   );
 }
+
+Text.TAGS = 'tags';
 
 export default Text;

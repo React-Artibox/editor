@@ -79,7 +79,7 @@ export function updateTags({
   let isFindingEnd = false;
   let workingLinkCursor = null;
 
-  Array.from(valueStr).forEach((str, index) => {
+  Array.from(`${valueStr} `).forEach((str, index) => {
     if (index === 0 || valueStr[index] !== valueStr[index - 1]) {
       if (isFindingEnd) {
         switch (valueStr[index - 1]) {

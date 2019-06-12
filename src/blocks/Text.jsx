@@ -227,7 +227,7 @@ function Text({
     let nodeContent = '';
     let concatingType = null;
 
-    Array.from(content).forEach((char, index) => {
+    Array.from(`${content} `).forEach((char, index) => {
       if (index === tags[workingTagIdx].to) {
         // Flush
         switch (concatingType) {

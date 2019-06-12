@@ -13,6 +13,7 @@ import Tooltip from '../tools/Tooltip';
 import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
 import { getSelectedRangeOnPreview } from '../helpers/range.js';
+import { updateAllTagsPosition } from '../helpers/middleware.js';
 import LinkModal from '../components/LinkModal.jsx';
 
 const BASIC_HEIGHT = {
@@ -338,12 +339,7 @@ function Text({
             id,
           })}
           onSelect={() => onSelect()}
-          onClick={({ target }) => {
-            if (target.selectionStart === target.selectionEnd) {
-              // user is ready to type
-              setCurrentCaretIdx(target.selectionStart);
-            }
-          }}
+          onClick={({ target }) => setCurrentCaretIdx(target.selectionEnd)}
           onKeyDown={(e) => {
             const { which, shiftKey } = e;
 
@@ -371,6 +367,18 @@ function Text({
                 break;
             }
           }}
+          onKeyUp={({ target, which }) => {
+            switch (which) {
+              case 37: // left
+              case 38: // top
+              case 39: // right
+              case 40: // down
+                setCurrentCaretIdx(target.selectionEnd);
+                break;
+              default:
+                break;
+            }
+          }}
           onInput={({ target }) => {
             target.style.height = `${BASIC_HEIGHT[type]}px`;
 
@@ -380,15 +388,22 @@ function Text({
           }}
           value={content}
           onChange={({ target }) => {
-            if (target.selectionStart === target.selectionEnd) {
-              // typing
-              setCurrentCaretIdx(target.selectionStart);
-            }
+            const newTags = updateAllTagsPosition({
+              prevCursorIdx: currentCaretIdx,
+              nextCursorIdx: target.selectionStart,
+              tags: (meta && meta[Text.TAGS]) || [],
+            });
+
             dispatch({
               type: Actions.CHANGE_AND_UPDATE_META,
               id,
               content: target.value,
+              meta: {
+                tags: newTags,
+              },
             });
+
+            setCurrentCaretIdx(target.selectionEnd);
           }}
           className="artibox-input"
           placeholder="在此輸入內容"

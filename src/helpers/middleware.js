@@ -118,4 +118,65 @@ export function updateTags({
   });
 }
 
-export default null;
+export function updateAllTagsPosition({
+  prevCursorIdx,
+  nextCursorIdx,
+  tags,
+}: {
+  prevCursorIdx: number,
+  nextCursorIdx: number,
+  tags: Array<Tag>,
+}): [Tag] {
+  if (!~prevCursorIdx
+    || !~nextCursorIdx
+    || prevCursorIdx === nextCursorIdx
+  ) {
+    return tags;
+  }
+
+  const cursorDeviation = nextCursorIdx - prevCursorIdx;
+  const newTags = tags.map((tag) => {
+    if (cursorDeviation < 0) {
+      // delete mode only
+      if (prevCursorIdx >= tag.from && prevCursorIdx < tag.to && nextCursorIdx < tag.from) {
+        // edit partial link => N - | - P |
+        return ({
+          ...tag,
+          from: nextCursorIdx,
+          to: nextCursorIdx + (tag.to - prevCursorIdx),
+        });
+      }
+
+      if (prevCursorIdx > tag.to && nextCursorIdx < tag.to && nextCursorIdx > tag.from) {
+        // edit partial link => | N - | - P
+        return ({
+          ...tag,
+          from: tag.from,
+          to: nextCursorIdx,
+        });
+      }
+    }
+
+    if (prevCursorIdx <= tag.from) {
+      // edit some char before the tag => P-N | |
+      return ({
+        ...tag,
+        from: tag.from + cursorDeviation,
+        to: tag.to + cursorDeviation,
+      });
+    }
+
+    if (prevCursorIdx > tag.from && nextCursorIdx < tag.to) {
+      // edit link substring => | P-N |
+      return ({
+        ...tag,
+        from: tag.from,
+        to: tag.to + cursorDeviation,
+      });
+    }
+
+    return tag;
+  }).filter(t => !(t.to <= t.from)); // filter all deleted tags
+
+  return newTags;
+}

@@ -141,11 +141,17 @@ export function updateAllTagsPosition({
   prevCursorIdx,
   nextCursorIdx,
   tags,
+  prevContent,
+  nextContent,
 }: {
   prevCursorIdx: number,
   nextCursorIdx: number,
   tags: Array<Tag>,
+  prevContent: string,
+  nextContent: string,
 }): [Tag] {
+  if (prevContent && !nextContent) return []; // fully delete
+
   if (!~prevCursorIdx
     || !~nextCursorIdx
     || prevCursorIdx === nextCursorIdx

@@ -395,6 +395,8 @@ function Text({
               prevCursorIdx: currentCaretIdx,
               nextCursorIdx: target.selectionStart,
               tags: (meta && meta[Text.TAGS]) || [],
+              prevContent: content,
+              nextContent: target.value,
             });
 
             dispatch({

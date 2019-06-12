@@ -127,7 +127,7 @@ function reducer(state, action) {
       return state;
     }
 
-    case Actions.CHANGE_TYPE:
+    case Actions.CHANGE_TYPE: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
       if (~updateIndex) {
@@ -148,6 +148,7 @@ function reducer(state, action) {
       }
 
       return state;
+    }
 
     case Actions.FOCUS: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
@@ -191,7 +192,7 @@ function reducer(state, action) {
       return state;
     }
 
-    case Actions.CHANGE: {
+    case Actions.CHANGE_AND_UPDATE_META: {
       const updateIndex = state.blocks.findIndex(block => action.id === block.id);
 
       if (~updateIndex) {
@@ -205,6 +206,10 @@ function reducer(state, action) {
               {
                 ...state.blocks[updateIndex],
                 content: action.content,
+                meta: action.meta ? {
+                  ...state.blocks[updateIndex].meta,
+                  ...action.meta,
+                } : state.blocks[updateIndex].meta,
               },
               ...state.blocks.slice(updateIndex + 1),
             ],
@@ -214,19 +219,19 @@ function reducer(state, action) {
         return {
           ...state,
           blocks: [
-            ...state.blocks.slice(0, updateIndex).map(block => block.focus ? {
+            ...state.blocks.slice(0, updateIndex).map(block => (block.focus ? {
               ...block,
               focus: false,
-            } : block),
+            } : block)),
             {
               ...state.blocks[updateIndex],
               content: action.content,
               focus: true,
             },
-            ...state.blocks.slice(updateIndex + 1).map(block => block.focus ? {
+            ...state.blocks.slice(updateIndex + 1).map(block => (block.focus ? {
               ...block,
               focus: false,
-            } : block),
+            } : block)),
           ],
         };
       }

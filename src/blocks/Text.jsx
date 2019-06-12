@@ -172,6 +172,7 @@ function Text({
   });
   const [isHover, setHover] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [currentCaretIdx, setCurrentCaretIdx] = useState(0);
   const textarea = useRef();
   const display = useRef();
   const textmenu = useRef();
@@ -337,6 +338,12 @@ function Text({
             id,
           })}
           onSelect={() => onSelect()}
+          onClick={({ target }) => {
+            if (target.selectionStart === target.selectionEnd) {
+              // user is ready to type
+              setCurrentCaretIdx(target.selectionStart);
+            }
+          }}
           onKeyDown={(e) => {
             const { which, shiftKey } = e;
 
@@ -372,11 +379,17 @@ function Text({
             target.parentNode.parentNode.style.height = newHeight;
           }}
           value={content}
-          onChange={({ target: { value } }) => dispatch({
-            type: Actions.CHANGE,
-            id,
-            content: value,
-          })}
+          onChange={({ target }) => {
+            if (target.selectionStart === target.selectionEnd) {
+              // typing
+              setCurrentCaretIdx(target.selectionStart);
+            }
+            dispatch({
+              type: Actions.CHANGE_AND_UPDATE_META,
+              id,
+              content: target.value,
+            });
+          }}
           className="artibox-input"
           placeholder="在此輸入內容"
           style={{

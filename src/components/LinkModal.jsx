@@ -77,6 +77,23 @@ function LinkModal({
     : null;
   const [currentMeta, setMeta] = useState(existCurrentMeta || {});
 
+  function onSubmit() {
+    updateTags({
+      originContent: content,
+      contentId: id,
+      meta,
+      dispatch,
+      newTag: {
+        ...currentMeta,
+        type: TagTypes.LINK,
+        from,
+        to,
+      },
+    });
+
+    setShowLinkInput(false);
+  }
+
   // Auto Focus On Link Modal Open
   useEffect(() => {
     dispatch({
@@ -115,22 +132,7 @@ function LinkModal({
           Open new window
         </button>
         <button
-          onClick={() => {
-            updateTags({
-              originContent: content,
-              contentId: id,
-              meta,
-              dispatch,
-              newTag: {
-                ...currentMeta,
-                type: TagTypes.LINK,
-                from,
-                to,
-              },
-            });
-
-            setShowLinkInput(false);
-          }}
+          onClick={() => onSubmit()}
           style={metaStyles.removeBtn}
           type="button">
           <span style={metaStyles.removeBtnLine1} />
@@ -141,6 +143,21 @@ function LinkModal({
           ref={linkTextInput}
           value={(currentMeta && currentMeta.url) || ''}
           placeholder="https://"
+          onKeyDown={(e) => {
+            const { which, shiftKey } = e;
+
+            switch (which) {
+              case 13:
+                if (shiftKey) break;
+
+                e.preventDefault();
+
+                onSubmit();
+                break;
+              default:
+                break;
+            }
+          }}
           onChange={({ target }) => setMeta({
             ...currentMeta,
             url: target.value,

@@ -10,6 +10,7 @@ type Tag = {
   from: number,
   to: number,
   url?: string,
+  newWindow?: boolean,
 };
 
 export function updateTags({
@@ -45,7 +46,13 @@ export function updateTags({
 
       case TagTypes.LINK:
         linkCursor += 1;
-        linkMap.set(String.fromCharCode(linkCursor), t.url);
+        linkMap.set(
+          String.fromCharCode(linkCursor),
+          {
+            url: t.url,
+            newWindow: t.newWindow || false,
+          },
+        );
 
         Array.from(Array(t.to - t.from)).forEach((n, index) => {
           valueStr = `${valueStr.substring(0, index + t.from)}${String.fromCharCode(linkCursor)}${valueStr.substring(index + t.from + 1)}`;
@@ -99,7 +106,7 @@ export function updateTags({
               type: TagTypes.LINK,
               from: index,
               to: index,
-              url: linkMap.get(str),
+              ...linkMap.get(str),
             });
 
             workingLinkCursor = str;

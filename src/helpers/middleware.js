@@ -176,7 +176,11 @@ export function updateAllTagsPosition({
       }
     }
 
-    if (prevCursorIdx > tag.from && nextCursorIdx <= tag.to && nextCursorIdx > tag.from) {
+    if (prevCursorIdx > tag.from
+      && prevCursorIdx <= tag.to
+      && nextCursorIdx <= tag.to
+      && nextCursorIdx > tag.from
+    ) {
       // edit link substring => | P-N |
       return ({
         ...tag,
@@ -194,8 +198,13 @@ export function updateAllTagsPosition({
       });
     }
 
+    if (nextCursorIdx === tag.from && prevCursorIdx === tag.to) {
+      // fully equal
+      return null;
+    }
+
     return tag;
-  }).filter(t => !(t.to <= t.from)); // filter all deleted tags
+  }).filter(t => (t && !(t.to <= t.from))); // filter all deleted tags
 
   return newTags;
 }

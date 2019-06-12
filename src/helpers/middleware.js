@@ -164,20 +164,20 @@ export function updateAllTagsPosition({
       }
     }
 
+    if (prevCursorIdx > tag.from && nextCursorIdx <= tag.to && nextCursorIdx > tag.from) {
+      // edit link substring => | P-N |
+      return ({
+        ...tag,
+        from: tag.from,
+        to: tag.to + cursorDeviation,
+      });
+    }
+
     if (prevCursorIdx <= tag.from) {
       // edit some char before the tag => P-N | |
       return ({
         ...tag,
         from: tag.from + cursorDeviation,
-        to: tag.to + cursorDeviation,
-      });
-    }
-
-    if (prevCursorIdx > tag.from && nextCursorIdx < tag.to) {
-      // edit link substring => | P-N |
-      return ({
-        ...tag,
-        from: tag.from,
         to: tag.to + cursorDeviation,
       });
     }

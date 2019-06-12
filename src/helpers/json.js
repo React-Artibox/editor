@@ -3,7 +3,7 @@
 import uuid from 'uuid/v4';
 import BLOCK_TYPES, { BLOCK_NAMES } from '../constants/blockTypes';
 import ALIGNS, { ALIGN_NAMES } from '../constants/aligns';
-import { TAG_NAMES } from '../constants/tags';
+import TAG_TYPES, { TAG_NAMES } from '../constants/tags';
 
 export function toJSON(storedObject = {}) {
   return {
@@ -38,7 +38,7 @@ export function fromJSON(json = { blocks: [] }) {
           ...(block.meta.ALIGN ? { ALIGN: ALIGNS[block.meta.ALIGN] } : {}),
           tags: Array.isArray(block.meta.tags) ? block.meta.tags.map(tag => ({
             ...tag,
-            type: TAG_NAMES[tag.type],
+            type: TAG_TYPES[tag.type],
           })) : [],
         } : {},
       };

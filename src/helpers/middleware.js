@@ -38,11 +38,22 @@ export function updateTags({
     newTag,
   ].forEach((t) => {
     switch (t.type) {
-      case TagTypes.HIGHLIGHT:
-        Array.from(Array(t.to - t.from)).forEach((n, index) => {
-          valueStr = `${valueStr.substring(0, index + t.from)}${HIGHLIGHT_SYMBOL}${valueStr.substring(index + t.from + 1)}`;
-        });
+      case TagTypes.HIGHLIGHT: {
+        const notFullyEqual = Array.from(valueStr.substring(t.from, t.to))
+          .some(symbol => symbol !== HIGHLIGHT_SYMBOL);
+
+        if (notFullyEqual) {
+          Array.from(Array(t.to - t.from)).forEach((_, index) => {
+            valueStr = `${valueStr.substring(0, index + t.from)}${HIGHLIGHT_SYMBOL}${valueStr.substring(index + t.from + 1)}`;
+          });
+        } else {
+          // fully equal means delete highlight tag
+          Array.from(Array(t.to - t.from)).forEach((_, index) => {
+            valueStr = `${valueStr.substring(0, index + t.from)}.${valueStr.substring(index + t.from + 1)}`;
+          });
+        }
         break;
+      }
 
       case TagTypes.LINK:
         linkCursor += 1;
@@ -54,7 +65,7 @@ export function updateTags({
           },
         );
 
-        Array.from(Array(t.to - t.from)).forEach((n, index) => {
+        Array.from(Array(t.to - t.from)).forEach((_, index) => {
           valueStr = `${valueStr.substring(0, index + t.from)}${String.fromCharCode(linkCursor)}${valueStr.substring(index + t.from + 1)}`;
         });
         break;
@@ -90,7 +101,7 @@ export function updateTags({
       }
 
       switch (str) {
-        case HIGHLIGHT_SYMBOL:
+        case HIGHLIGHT_SYMBOL: {
           newTags.push({
             type: TagTypes.HIGHLIGHT,
             from: index,
@@ -99,6 +110,7 @@ export function updateTags({
 
           isFindingEnd = true;
           break;
+        }
 
         default:
           if (linkMap.get(str)) {

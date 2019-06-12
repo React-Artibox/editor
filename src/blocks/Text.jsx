@@ -13,7 +13,10 @@ import Tooltip from '../tools/Tooltip';
 import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
 import { getSelectedRangeOnPreview } from '../helpers/range.js';
-import { updateAllTagsPosition } from '../helpers/middleware.js';
+import {
+  updateAllTagsPosition,
+  updateTags,
+} from '../helpers/middleware.js';
 import LinkModal from '../components/LinkModal.jsx';
 
 const BASIC_HEIGHT = {
@@ -151,7 +154,7 @@ const styles = {
     textDecoration: 'underline',
   },
   highlight: {
-    color: 'rgb(230, 41, 16)',
+    color: 'rgb(214, 87, 71)',
   },
 };
 
@@ -452,6 +455,23 @@ function Text({
                 left: menu ? menu.x : 0,
                 top: menu ? menu.y : 0,
               }}>
+              <button
+                onClick={() => updateTags({
+                  originContent: content,
+                  contentId: id,
+                  meta,
+                  dispatch,
+                  newTag: {
+                    type: TagTypes.HIGHLIGHT,
+                    from: (menu && menu.from) || 0,
+                    to: (menu && menu.to) || 0,
+                  },
+                })}
+                className="artibox-tooltip-btn"
+                style={styles.textmenuBtn}
+                type="button">
+                <Icons.HIGHLIGHT fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
+              </button>
               <button
                 onClick={() => setShowLinkInput(true)}
                 className="artibox-tooltip-btn"

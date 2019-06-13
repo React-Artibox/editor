@@ -6,7 +6,7 @@ import Progress from './constants/progress';
 import { createFileUploader } from './parsers/image';
 import BlockTypes from './constants/blockTypes';
 import reduxFormEditor from './interfaces/reduxForm';
-import { toJSON } from './helpers/json';
+import { toJSON, fromJSON } from './helpers/json';
 
 export {
   ArtiboxProvider,
@@ -16,4 +16,5 @@ export {
   BlockTypes,
   reduxFormEditor,
   toJSON,
+  fromJSON,
 };

@@ -1,10 +1,23 @@
 // @flow
-
-import React, { useContext, useEffect, useRef } from 'react';
+/* eslint no-param-reassign: 0 */
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
+import TagTypes from '../constants/tags';
 import Tooltip from '../tools/Tooltip';
+import Icons from '../constants/icons';
 import { Dispatch as DispatchContext } from '../constants/context';
+import { getSelectedRangeOnPreview } from '../helpers/range.js';
+import {
+  updateAllTagsPosition,
+  updateTags,
+} from '../helpers/middleware.js';
+import LinkModal from '../components/LinkModal.jsx';
 
 const BASIC_HEIGHT = {
   [BlockTypes.TEXT]: 26,
@@ -98,6 +111,51 @@ const styles = {
     right: 0,
     top: -7,
   },
+  textmenu: {
+    position: 'absolute',
+    zIndex: 10,
+    width: 'auto',
+    height: 36,
+    backgroundColor: '#1B2733',
+    borderRadius: 4,
+    boxShadow: '0 0 0 1px #000, 0 8px 16px rgba(27, 39, 51, 0.16)',
+    padding: 0,
+    opacity: 0,
+    transform: 'scale(1.01) translate(0, -12px)',
+    transition: 'opacity 0.12s ease-out, transform 0.08s ease-out',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
+  textmenuShown: {
+    opacity: 1,
+    pointerEvents: 'auto',
+    transform: 'scale(1) translate(0, 0)',
+  },
+  textmenuBtn: {
+    width: 24,
+    height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 8px',
+    border: 0,
+    backgroundColor: 'transparent',
+    padding: 0,
+    outline: 'none',
+    boxShadow: 'none',
+    borderRadius: 0,
+    cursor: 'pointer',
+    position: 'relative',
+  },
+  link: {
+    color: 'rgb(94, 106, 221)',
+    textDecoration: 'underline',
+  },
+  highlight: {
+    color: 'rgb(214, 87, 71)',
+  },
 };
 
 function Text({
@@ -106,9 +164,130 @@ function Text({
   type,
   focus,
   firstLoaded,
+  meta,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
+  const [menu, setMenu] = useState({
+    isShown: false,
+    x: 0,
+    y: 0,
+    from: 0,
+    to: 0,
+  });
+  const [isHover, setHover] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [currentCaretIdx, setCurrentCaretIdx] = useState(0);
   const textarea = useRef();
+  const display = useRef();
+  const textmenu = useRef();
+  // textarea onSelect evt
+  function onSelect() {
+    const {
+      current: input,
+    } = textarea;
+
+    if (input.selectionStart === input.selectionEnd) {
+      if (menu && menu.isShown) {
+        setMenu({
+          ...menu,
+          isShown: false,
+        });
+      }
+      return;
+    }
+
+    const previewRange = getSelectedRangeOnPreview(textarea, display);
+    const {
+      x: parentX,
+      y: parentY,
+    } = input.getBoundingClientRect();
+    const {
+      x: selectionX,
+      y: selectionY,
+      width,
+    } = previewRange.getBoundingClientRect();
+    const { width: menuWidth } = textmenu.current.getBoundingClientRect();
+
+    setMenu({
+      ...menu,
+      isShown: true,
+      x: (selectionX + ((width - menuWidth) / 2)) - parentX,
+      y: selectionY - parentY - 40,
+      from: input.selectionStart,
+      to: input.selectionEnd,
+    });
+  }
+
+  function wrapTags() {
+    const wrappedStrings = [];
+    const tags = (meta && meta.tags) || [];
+    if (!tags.length) return content;
+
+    let workingTagIdx = 0;
+    let nodeContent = '';
+    let concatingType = null;
+
+    Array.from(`${content} `).forEach((char, index) => {
+      if (index === tags[workingTagIdx].to) {
+        // Flush
+        switch (concatingType) {
+          case TagTypes.HIGHLIGHT:
+            wrappedStrings.push((
+              <span
+                key={workingTagIdx}
+                style={styles.highlight}>
+                {nodeContent}
+              </span>
+            ));
+
+            nodeContent = '';
+            break;
+
+          case TagTypes.LINK:
+            wrappedStrings.push((
+              <a
+                rel="noopener noreferrer"
+                href={tags[workingTagIdx].url}
+                target="_blank"
+                key={workingTagIdx}
+                style={styles.link}>
+                {nodeContent}
+              </a>
+            ));
+
+            nodeContent = '';
+            break;
+
+          default:
+            wrappedStrings.push(nodeContent);
+
+            nodeContent = '';
+            break;
+        }
+
+        if (tags[workingTagIdx + 1]) {
+          workingTagIdx += 1;
+        }
+      }
+
+      if (index === tags[workingTagIdx].from) {
+        // Flush Plain Text
+        wrappedStrings.push(nodeContent);
+        nodeContent = '';
+        concatingType = tags[workingTagIdx].type;
+      }
+
+      nodeContent = `${nodeContent}${char}`;
+    });
+
+    wrappedStrings.push(nodeContent);
+
+    return (
+      <>
+        {wrappedStrings}
+      </>
+    );
+  }
 
   useEffect(() => {
     const { current } = textarea;
@@ -120,7 +299,7 @@ function Text({
       current.style.height = newHeight;
       current.parentNode.parentNode.style.height = newHeight;
     }
-  }, [textarea]);
+  }, [textarea, type]);
 
   useEffect(() => {
     const { current } = textarea;
@@ -145,7 +324,7 @@ function Text({
       type: Actions.LOADED,
       id,
     });
-  }, []);
+  }, [dispatch, firstLoaded, id]);
 
   return (
     <div
@@ -162,6 +341,8 @@ function Text({
             type: Actions.FOCUS,
             id,
           })}
+          onSelect={() => onSelect()}
+          onClick={({ target }) => setCurrentCaretIdx(target.selectionEnd)}
           onKeyDown={(e) => {
             const { which, shiftKey } = e;
 
@@ -184,7 +365,19 @@ function Text({
                     id,
                   });
                 }
-
+                break;
+              default:
+                break;
+            }
+          }}
+          onKeyUp={({ target, which }) => {
+            switch (which) {
+              case 37: // left
+              case 38: // top
+              case 39: // right
+              case 40: // down
+                setCurrentCaretIdx(target.selectionEnd);
+                break;
               default:
                 break;
             }
@@ -197,11 +390,26 @@ function Text({
             target.parentNode.parentNode.style.height = newHeight;
           }}
           value={content}
-          onChange={({ target: { value }}) => dispatch({
-            type: Actions.CHANGE,
-            id,
-            content: value,
-          })}
+          onChange={({ target }) => {
+            const newTags = updateAllTagsPosition({
+              prevCursorIdx: currentCaretIdx,
+              nextCursorIdx: target.selectionStart,
+              tags: (meta && meta[Text.TAGS]) || [],
+              prevContent: content,
+              nextContent: target.value,
+            });
+
+            dispatch({
+              type: Actions.CHANGE_AND_UPDATE_META,
+              id,
+              content: target.value,
+              meta: {
+                tags: newTags,
+              },
+            });
+
+            setCurrentCaretIdx(target.selectionEnd);
+          }}
           className="artibox-input"
           placeholder="在此輸入內容"
           style={{
@@ -214,6 +422,7 @@ function Text({
             color: COLOR[type],
           }} />
         <div
+          ref={display}
           style={{
             ...styles.display,
             fontSize: FONT_SIZE[type],
@@ -222,8 +431,59 @@ function Text({
             letterSpacing: LETTER_SPACING[type],
             color: COLOR[type],
           }}>
-          {content}
+          {wrapTags()}
         </div>
+        {(() => {
+          if (showLinkInput) {
+            return (
+              <LinkModal
+                {...menu}
+                id={id}
+                content={content}
+                firstLoaded={firstLoaded}
+                setShowLinkInput={setShowLinkInput}
+                meta={meta} />
+            );
+          }
+
+          return (
+            <div
+              ref={textmenu}
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+              style={{
+                ...styles.textmenu,
+                ...(menu && menu.isShown ? styles.textmenuShown : {}),
+                left: menu ? menu.x : 0,
+                top: menu ? menu.y : 0,
+              }}>
+              <button
+                onClick={() => updateTags({
+                  originContent: content,
+                  contentId: id,
+                  meta,
+                  dispatch,
+                  newTag: {
+                    type: TagTypes.HIGHLIGHT,
+                    from: (menu && menu.from) || 0,
+                    to: (menu && menu.to) || 0,
+                  },
+                })}
+                className="artibox-tooltip-btn"
+                style={styles.textmenuBtn}
+                type="button">
+                <Icons.HIGHLIGHT fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
+              </button>
+              <button
+                onClick={() => setShowLinkInput(true)}
+                className="artibox-tooltip-btn"
+                style={styles.textmenuBtn}
+                type="button">
+                <Icons.LINK fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
+              </button>
+            </div>
+          );
+        })()}
         {focus ? (
           <div style={styles.tooltipWrapper}>
             <Tooltip
@@ -236,5 +496,7 @@ function Text({
     </div>
   );
 }
+
+Text.TAGS = 'tags';
 
 export default Text;

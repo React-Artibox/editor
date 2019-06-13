@@ -9,7 +9,6 @@ import {
   createFileUploader,
   BlockTypes,
   toJSON,
-  fromJSON,
 } from '../src/index';
 
 const styles = {
@@ -34,7 +33,20 @@ function SimpleEditor() {
       },
     }, {
       type: 'TEXT',
-      content: 'Hahah',
+      content: 'Hello ! Here may be a link or a highlight.',
+      meta: {
+        tags: [{
+          type: 'LINK',
+          from: 22,
+          to: 26,
+          newWindow: true,
+          url: 'https://www.google.com',
+        }, {
+          type: 'HIGHLIGHT',
+          from: 32,
+          to: 41,
+        }],
+      },
     }, {
       type: 'YOUTUBE',
       content: 'nDTUg4R4dxk',
@@ -63,7 +75,7 @@ function SimpleEditor() {
         {shown ? (
           <Editor
             initialValues={{
-              blocks: [],
+              blocks: data.blocks,
             }}
             onChange={(state) => {
               console.log('HELLO', state, toJSON(state));

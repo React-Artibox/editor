@@ -17,7 +17,7 @@ import {
   updateAllTagsPosition,
   updateTags,
 } from '../helpers/middleware.js';
-import LinkModal from '../components/LinkModal.jsx';
+import LinkModal from '../components/LinkModal';
 
 const BASIC_HEIGHT = {
   [BlockTypes.TEXT]: 26,

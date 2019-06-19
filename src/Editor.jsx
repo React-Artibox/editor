@@ -1,6 +1,11 @@
 // @flow
 
-import React, { useState, useReducer, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useReducer,
+  useEffect,
+  useRef,
+} from 'react';
 import uuid from 'uuid/v4';
 import './main.css';
 import BlockTypes from './constants/blockTypes';
@@ -45,7 +50,7 @@ function initializer(autoFocus = false) {
     return {
       ...initialValues,
       blocks: [
-        ...initialValues.blocks.map((block, index) => index === lastIndex ? {
+        ...initialValues.blocks.map((block, index) => (index === lastIndex ? {
           ...block,
           focus: autoFocus,
           loaded: false,
@@ -53,7 +58,7 @@ function initializer(autoFocus = false) {
           ...block,
           focus: false,
           loaded: false,
-        }),
+        })),
       ],
     };
   };
@@ -157,18 +162,18 @@ function reducer(state, action) {
         return {
           ...state,
           blocks: [
-            ...state.blocks.slice(0, updateIndex).map(block => block.focus ? {
+            ...state.blocks.slice(0, updateIndex).map(block => (block.focus ? {
               ...block,
               focus: false,
-            } : block),
+            } : block)),
             {
               ...state.blocks[updateIndex],
               focus: true,
             },
-            ...state.blocks.slice(updateIndex + 1).map(block => block.focus ? {
+            ...state.blocks.slice(updateIndex + 1).map(block => (block.focus ? {
               ...block,
               focus: false,
-            } : block),
+            } : block)),
           ],
         };
       }
@@ -247,10 +252,10 @@ function reducer(state, action) {
           return {
             ...state,
             blocks: [
-              ...state.blocks.slice(0, targetIndex + 1).map(block => block.focus ? {
+              ...state.blocks.slice(0, targetIndex + 1).map(block => (block.focus ? {
                 ...block,
                 focus: false,
-              } : block),
+              } : block)),
               {
                 id: uuid(),
                 type: BlockTypes.TEXT,
@@ -259,10 +264,10 @@ function reducer(state, action) {
                 meta: {},
                 loaded: true,
               },
-              ...state.blocks.slice(targetIndex + 1).map(block => block.focus ? {
+              ...state.blocks.slice(targetIndex + 1).map(block => (block.focus ? {
                 ...block,
                 focus: false,
-              } : block),
+              } : block)),
             ],
           };
         }
@@ -271,10 +276,10 @@ function reducer(state, action) {
       return {
         ...state,
         blocks: [
-          ...state.blocks.map(block => block.focus ? {
+          ...state.blocks.map(block => (block.focus ? {
             ...block,
             focus: false,
-          } : block),
+          } : block)),
           {
             id: uuid(),
             type: BlockTypes.TEXT,
@@ -305,6 +310,12 @@ function Editor({
   initialValues,
   onChange,
   autoFocus,
+  placeholder,
+}: {
+  initialValues: {},
+  onChange: Function,
+  autoFocus?: boolean,
+  placeholder?: ?string,
 }) {
   if (typeof onChange !== 'function') throw new Error('Please pass onChange function to get data update.');
 
@@ -400,6 +411,7 @@ function Editor({
           }
         })}
         <div
+          tabIndex={-1}
           role="button"
           onMouseDown={(e) => {
             e.preventDefault();
@@ -423,7 +435,7 @@ function Editor({
           style={styles.blockCreator}>
           {state.blocks.length ? null : (
             <span style={styles.blockCreatorPlaceholder}>
-              在此處輸入內容
+              {placeholder}
             </span>
           )}
         </div>
@@ -434,6 +446,7 @@ function Editor({
 
 Editor.defaultProps = {
   autoFocus: false,
+  placeholder: '在此輸入內容',
 };
 
 export default Editor;

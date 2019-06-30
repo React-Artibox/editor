@@ -343,7 +343,7 @@ function ImageComponent({
         }
       }
     }
-  }, [isDescriptionModalShown]);
+  }, [isDescriptionModalShown, container, dispatch, id, description, firstLoaded]);
 
   // Auto Focus On Link Modal Open
   useEffect(() => {
@@ -380,7 +380,7 @@ function ImageComponent({
         }
       }
     }
-  }, [isLinkModalShown]);
+  }, [isLinkModalShown, container, dispatch, id, firstLoaded, linkURL, linkSelf]);
 
   // Update Align
   useEffect(() => {
@@ -391,7 +391,7 @@ function ImageComponent({
         [ImageComponent.ALIGN]: align,
       },
     });
-  }, [align]);
+  }, [align, dispatch, id]);
 
   useEffect(() => {
     const { current } = container;
@@ -404,7 +404,7 @@ function ImageComponent({
       type: Actions.LOADED,
       id,
     });
-  }, []);
+  }, [container, id, dispatch, firstLoaded]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>

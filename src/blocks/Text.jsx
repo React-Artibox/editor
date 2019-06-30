@@ -12,7 +12,6 @@ import React, {
 } from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
-import Tooltip from '../tools/Tooltip';
 import SelectionContextMenu from '../components/SelectionContextMenu';
 import { Dispatch as DispatchContext } from '../constants/context';
 
@@ -101,12 +100,6 @@ const styles = {
     wordWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     width: '100%',
-  },
-  tooltipWrapper: {
-    position: 'absolute',
-    zIndex: 5,
-    right: 0,
-    top: -7,
   },
   textmenu: {
     position: 'absolute',
@@ -476,18 +469,13 @@ function Text({
           {wrappedContent}
           <SelectionContextMenu
             blockId={id}
+            type={type}
             meta={meta}
+            focus={focus}
+            hasContent={!!content}
             display={display}
             textarea={textarea} />
         </div>
-        {focus ? (
-          <div style={styles.tooltipWrapper}>
-            <Tooltip
-              type={type}
-              hasContent={!!content}
-              blockId={id} />
-          </div>
-        ) : null}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import Icons from '../constants/icons';
 import Actions from '../constants/actions';
 import { Dispatch as DispatchContext } from '../constants/context';
 import LinkModal from './LinkModal';
+import Tooltip from '../tools/Tooltip';
 
 type Props = {
   display: {
@@ -26,6 +27,9 @@ type Props = {
     MARKERS: Array<TextHighlightMarkerType | TextLinkMarkerType>,
   },
   blockId: string,
+  type: string,
+  hasContent: boolean,
+  focus: boolean,
 };
 
 function isSameMark(markA, markB) {
@@ -72,6 +76,13 @@ const styles = {
     borderRadius: 0,
     cursor: 'pointer',
     position: 'relative',
+  },
+  tooltipWrapper: {
+    position: 'absolute',
+    zIndex: 10,
+    right: 0,
+    top: -42,
+    pointerEvents: 'auto',
   },
 };
 
@@ -126,6 +137,9 @@ export function getSelectionRange(input, view) {
 
 function SelectionContextMenu({
   meta,
+  focus,
+  type,
+  hasContent,
   blockId,
   textarea: {
     current: input,
@@ -152,6 +166,10 @@ function SelectionContextMenu({
     if (typeof input === 'undefined') return () => {};
 
     function onDocumentSelectionChangeHandler() {
+      if (shown && !document.getSelection().focusNode.contains(input)) {
+        setShown(false);
+      }
+
       if (input.selectionStart === input.selectionEnd) {
         setCursorStart(input.selectionStart);
         setCursorEnd(input.selectionEnd);
@@ -161,7 +179,7 @@ function SelectionContextMenu({
     document.addEventListener('selectionchange', onDocumentSelectionChangeHandler, false);
 
     return () => document.addEventListener('selectionchange', onDocumentSelectionChangeHandler, false);
-  }, [input, cursorStart, cursorEnd]);
+  }, [input, cursorStart, cursorEnd, shown]);
 
   useEffect(() => {
     if (typeof input === 'undefined') return () => {};
@@ -343,6 +361,15 @@ function SelectionContextMenu({
     });
   }, [menuPosX, menuPosY]);
 
+  const tooltip = useMemo(() => (focus && !shown ? (
+    <div style={styles.tooltipWrapper}>
+      <Tooltip
+        type={type}
+        hasContent={hasContent}
+        blockId={blockId} />
+    </div>
+  ) : null), [type, hasContent, blockId, focus, shown]);
+
   return (
     <Fragment>
       <div style={menuStyles} ref={contextMenu}>
@@ -375,6 +402,7 @@ function SelectionContextMenu({
         </button>
       </div>
       {linkModal}
+      {tooltip}
     </Fragment>
   );
 }

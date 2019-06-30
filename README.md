@@ -10,13 +10,25 @@ import {
   Editor,
   createFileUploader,
   BlockTypes,
+  Features,
 } from '@artibox/editor';
 
+const {
+  TEXT_BLOCK_FULL,
+  IMAGE_BLOCK_BASIC,
+  IMAGE_ALIGN,
+  YOUTUBE_BLOCK,
+  SPLIT_LINE,
+} = Features;
+
 const artiboxOptions = {
-  availableTypes: [
-    BlockTypes.IMAGE,
-    BlockTypes.YOUTUBE,
-  ],
+  features: (
+    TEXT_BLOCK_FULL
+    | IMAGE_BLOCK_BASIC
+    | IMAGE_ALIGN
+    | YOUTUBE_BLOCK
+    | SPLIT_LINE
+  ),
   parseImageFile: createFileUploader('http://sample.artibox.org/uploader/files', files => files[0]),
   parseImageURL: file => `http://sample.artibox.org/uploads/${file}`,
 };
@@ -59,9 +71,9 @@ function SimpleForm() {
 
 ## Options
 
-- availableTypes: Array\<BlockTypes.IMAGE | BlockTypes.YOUTUBE\>
+- features: number
 
-Push an array including block types you wanna use.
+Push an bitwise number to active features
 
 - parseImageFile: (file: File, emitter: ?Emitter) => Promise
 

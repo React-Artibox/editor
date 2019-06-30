@@ -7,6 +7,7 @@ import { createFileUploader } from './parsers/image';
 import BlockTypes from './constants/blockTypes';
 import reduxFormEditor from './interfaces/reduxForm';
 import { toJSON, fromJSON } from './helpers/json';
+import Features from './constants/features';
 
 export {
   ArtiboxProvider,
@@ -17,4 +18,5 @@ export {
   reduxFormEditor,
   toJSON,
   fromJSON,
+  Features,
 };

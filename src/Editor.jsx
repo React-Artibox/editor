@@ -258,7 +258,7 @@ function reducer(state, action) {
               } : block)),
               {
                 id: uuid(),
-                type: BlockTypes.TEXT,
+                type: action.newType || BlockTypes.TEXT,
                 content: '',
                 focus: true,
                 meta: {},
@@ -282,7 +282,7 @@ function reducer(state, action) {
           } : block)),
           {
             id: uuid(),
-            type: BlockTypes.TEXT,
+            type: action.newType || BlockTypes.TEXT,
             content: '',
             focus: true,
             meta: {},
@@ -364,7 +364,7 @@ function Editor({
     if (state.blocks.every(block => block.loaded) && !firstLoaded) {
       setFirstLoaded(true);
     }
-  }, [state]);
+  }, [state, firstLoaded, isYouTubeAPILoaded]);
 
   return (
     <DispatchContext.Provider value={dispatch}>

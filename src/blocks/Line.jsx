@@ -77,6 +77,13 @@ function Line({
           })}
           onKeyDown={({ which }) => {
             switch (which) {
+              case 13:
+                dispatch({
+                  type: Actions.NEW_LINE,
+                  at: id,
+                });
+                break;
+
               case 8:
                 if (content === '') {
                   dispatch({

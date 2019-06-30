@@ -1,7 +1,14 @@
 // @flow
 /* eslint no-nested-ternary: 0 */
 
-import React, { Fragment, useRef, useState, useContext, useEffect } from 'react';
+import React, {
+  Fragment,
+  useRef,
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 import { EventEmitter } from 'events';
 import Icons from '../constants/icons';
 import {
@@ -15,6 +22,17 @@ import {
   isYouTubeURL,
   getYouTubeId,
 } from '../helpers/url';
+import {
+  IMAGE_BLOCK_BASIC,
+  TEXT_TITLE,
+  TEXT_SUBTITLE,
+  TEXT_QUOTE,
+  SPLIT_LINE,
+  YOUTUBE_BLOCK,
+  SLIDESHOW_BLOCK,
+  FACEBOOK_BLOCK,
+  INSTAGRAM_BLOCK,
+} from '../constants/features';
 
 const styles = {
   wrapper: {
@@ -139,7 +157,6 @@ const styles = {
   },
   urlInputTitle: {
     lineHeight: '32px',
-    margin: 0,
     fontSize: 12,
     color: '#4a4a4a',
     letterSpacing: 1,
@@ -150,7 +167,6 @@ const styles = {
   },
   urlInput: {
     border: 0,
-    backgroundColor: 'transparent',
     width: '100%',
     fontSize: 15,
     color: '#4a4a4a',
@@ -195,13 +211,6 @@ type Props = {
   type: Symbol,
 };
 
-const LEFT_TYPES = [
-  BlockTypes.TITLE,
-  BlockTypes.SUBTITLE,
-  BlockTypes.QUOTE,
-  BlockTypes.LINE,
-];
-
 function Tooltip({
   blockId,
   hasContent,
@@ -216,11 +225,11 @@ function Tooltip({
 
   const {
     parseImageFile,
-    availableTypes,
+    features,
   } = useContext(ConfigContext);
   const dispatch = useContext(DispatchContext);
 
-  // Check YouTube URL
+  // // Check YouTube URL
   useEffect(() => {
     setIsValidYouTubeURL(isYouTubeURL(youTubeURL));
   }, [youTubeURL]);
@@ -239,220 +248,247 @@ function Tooltip({
     }
   }, [isYouTubeURLInputShown]);
 
+  const availableButtons = useMemo(() => (
+    <Fragment>
+      {features & TEXT_TITLE ? (
+        <button
+          onClick={() => (type === BlockTypes.TITLE ? (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.TEXT,
+            })
+          ) : (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.TITLE,
+            })
+          ))}
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.TITLE fill={type === BlockTypes.TITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+        </button>
+      ) : null}
+      {features & TEXT_SUBTITLE ? (
+        <button
+          onClick={() => (type === BlockTypes.SUBTITLE ? (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.TEXT,
+            })
+          ) : (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.SUBTITLE,
+            })
+          ))}
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.SUBTITLE fill={type === BlockTypes.SUBTITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+        </button>
+      ) : null}
+      {features & TEXT_QUOTE ? (
+        <button
+          onClick={() => (type === BlockTypes.QUOTE ? (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.TEXT,
+            })
+          ) : (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.QUOTE,
+            })
+          ))}
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.QUOTE fill={type === BlockTypes.QUOTE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+        </button>
+      ) : null}
+      {features & (TEXT_SUBTITLE | TEXT_TITLE | TEXT_QUOTE) ? (
+        <span style={styles.spliter} />
+      ) : null}
+      {features & SPLIT_LINE ? (
+        <button
+          onClick={() => (hasContent ? (
+            dispatch({
+              type: Actions.NEW_LINE,
+              at: blockId,
+              newType: BlockTypes.LINE,
+            })
+          ) : (
+            dispatch({
+              type: Actions.CHANGE_TYPE,
+              id: blockId,
+              newType: BlockTypes.LINE,
+            })
+          ))}
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.LINE fill={type === BlockTypes.LINE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
+        </button>
+      ) : null}
+      {features & IMAGE_BLOCK_BASIC ? (
+        <button
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.PHOTO fill={isHover ? '#242424' : '#DBDBDB'} />
+          <input
+            onChange={async ({ target: { files } }) => {
+              if (files && files.length) {
+                const emitter = new EventEmitter();
+
+                emitter.on(Progress.START, () => setProgress(0));
+                emitter.on(Progress.PROGRESS, p => setProgress(p));
+                emitter.on(Progress.END, () => setProgress(null));
+
+                const url = await parseImageFile(files[0], emitter);
+
+                dispatch({
+                  type: Actions.CHANGE_TYPE,
+                  id: blockId,
+                  newType: BlockTypes.IMAGE,
+                  content: url,
+                });
+              }
+            }}
+            style={styles.imagePicker}
+            type="file"
+            accept="image/*" />
+        </button>
+      ) : null}
+      {features & SLIDESHOW_BLOCK ? (
+        <button
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.SLIDER fill={isHover ? '#242424' : '#DBDBDB'} />
+        </button>
+      ) : null}
+      {features & YOUTUBE_BLOCK ? (
+        <div style={styles.anchorWrapper}>
+          <button
+            onClick={() => setYouTubeURLInputShow(!isYouTubeURLInputShown)}
+            className="artibox-tooltip-btn"
+            style={styles.blockBtn}
+            type="button">
+            <Icons.VIDEO fill={isHover ? '#242424' : '#DBDBDB'} />
+          </button>
+          <div style={isYouTubeURLInputShown ? styles.urlInputBlockShown : styles.urlInputBlock}>
+            <h6 style={styles.urlInputTitle}>YouTube URL:</h6>
+            <div style={styles.urlInputWrapper}>
+              <input
+                onKeyPress={({ which }) => {
+                  if (isVaildYouTubeURL && which === 13) {
+                    dispatch({
+                      type: Actions.CHANGE_TYPE,
+                      id: blockId,
+                      newType: BlockTypes.YOUTUBE,
+                      content: getYouTubeId(youTubeURL),
+                    });
+
+                    setYouTubeURLInputShow(false);
+                  }
+                }}
+                ref={youtubeInput}
+                onChange={({ target }) => setYouTubeURL(target.value)}
+                value={youTubeURL}
+                style={styles.urlInput}
+                placeholder="https://www.youtube.com/watch?v=xxxxxxx"
+                type="text" />
+              {isVaildYouTubeURL ? (
+                <button
+                  onClick={() => {
+                    dispatch({
+                      type: Actions.CHANGE_TYPE,
+                      id: blockId,
+                      newType: BlockTypes.YOUTUBE,
+                      content: getYouTubeId(youTubeURL),
+                    });
+
+                    setYouTubeURLInputShow(false);
+                  }}
+                  style={styles.insertButton}
+                  type="button">
+                  Insert!
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {features & INSTAGRAM_BLOCK ? (
+        <button
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.INSTAGRAM fill={isHover ? '#242424' : '#DBDBDB'} />
+        </button>
+      ) : null}
+      {features & FACEBOOK_BLOCK ? (
+        <button
+          className="artibox-tooltip-btn"
+          style={styles.blockBtn}
+          type="button">
+          <Icons.FACEBOOK fill={isHover ? '#242424' : '#DBDBDB'} />
+        </button>
+      ) : null}
+    </Fragment>
+  ), [
+    hasContent,
+    features,
+    dispatch,
+    blockId,
+    isHover,
+    isYouTubeURLInputShown,
+    isVaildYouTubeURL,
+    parseImageFile,
+    type,
+    youTubeURL,
+  ]);
+
+  const progressStyles = useMemo(() => {
+    const width = `calc(${progress}% - 4px)`;
+
+    return {
+      height: 10,
+      width,
+      borderRadius: 5,
+      position: 'absolute',
+      left: 2,
+      top: 2,
+      display: 'block',
+      backgroundColor: '#1CC1D0',
+      transition: 'width 0.1s ease-out',
+    };
+  }, [progress]);
+
   return (
     <Fragment>
       <div style={progress === null ? styles.progressWrapper : styles.progressWrapperShown}>
         <div style={styles.progressBar}>
-          <span
-            style={{
-              width: `calc(${progress}% - 4px)`,
-              height: 10,
-              borderRadius: 5,
-              position: 'absolute',
-              left: 2,
-              top: 2,
-              display: 'block',
-              backgroundColor: '#1CC1D0',
-              transition: 'width 0.1s ease-out',
-            }} />
+          <span style={progressStyles} />
         </div>
         <p style={styles.progressText}>
-          {Math.round(progress * 100) / 100}%
+          {Math.round(progress * 100) / 100}
+          %
         </p>
       </div>
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         style={styles.wrapper}>
-        {~availableTypes.indexOf(BlockTypes.TITLE) ? (
-          <button
-            onClick={() => type === BlockTypes.TITLE ? (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.TEXT,
-              })
-            ) : (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.TITLE,
-              })
-            )}
-            className="artibox-tooltip-btn"
-            style={styles.blockBtn}
-            type="button">
-            <Icons.TITLE fill={type === BlockTypes.TITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
-          </button>
-        ) : null}
-        {~availableTypes.indexOf(BlockTypes.SUBTITLE) ? (
-          <button
-            onClick={() => type === BlockTypes.SUBTITLE ? (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.TEXT,
-              })
-            ) : (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.SUBTITLE,
-              })
-            )}
-            className="artibox-tooltip-btn"
-            style={styles.blockBtn}
-            type="button">
-            <Icons.SUBTITLE fill={type === BlockTypes.SUBTITLE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
-          </button>
-        ) : null}
-        {~availableTypes.indexOf(BlockTypes.QUOTE) ? (
-          <button
-            onClick={() => type === BlockTypes.QUOTE ? (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.TEXT,
-              })
-            ) : (
-              dispatch({
-                type: Actions.CHANGE_TYPE,
-                id: blockId,
-                newType: BlockTypes.QUOTE,
-              })
-            )}
-            className="artibox-tooltip-btn"
-            style={styles.blockBtn}
-            type="button">
-            <Icons.QUOTE fill={type === BlockTypes.QUOTE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
-          </button>
-        ) : null}
-        {~availableTypes.indexOf(BlockTypes.LINE) ? (
-          <button
-            onClick={() => dispatch({
-              type: Actions.CHANGE_TYPE,
-              id: blockId,
-              newType: BlockTypes.LINE,
-            })}
-            className="artibox-tooltip-btn"
-            style={styles.blockBtn}
-            type="button">
-            <Icons.LINE fill={type === BlockTypes.LINE ? '#1BDCDC' : (isHover ? '#242424' : '#DBDBDB')} />
-          </button>
-        ) : null}
-        {!hasContent ? (
-          <Fragment>
-            {LEFT_TYPES.some(type => ~availableTypes.indexOf(type)) ? (
-              <span style={styles.spliter} />
-            ) : null}
-            {~availableTypes.indexOf(BlockTypes.IMAGE) ? (
-              <button
-                className="artibox-tooltip-btn"
-                style={styles.blockBtn}
-                type="button">
-                <Icons.PHOTO fill={isHover ? '#242424' : '#DBDBDB'} />
-                <input
-                  onChange={async ({ target: { files }}) => {
-                    if (files && files.length) {
-                      const emitter = new EventEmitter();
-
-                      emitter.on(Progress.START, () => setProgress(0));
-                      emitter.on(Progress.PROGRESS, progress => setProgress(progress));
-                      emitter.on(Progress.END, () => setProgress(null));
-
-                      const url = await parseImageFile(files[0], emitter);
-
-                      dispatch({
-                        type: Actions.CHANGE_TYPE,
-                        id: blockId,
-                        newType: BlockTypes.IMAGE,
-                        content: url,
-                      });
-                    }
-                  }}
-                  style={styles.imagePicker}
-                  type="file"
-                  accept="image/*" />
-              </button>
-            ) : null}
-            {~availableTypes.indexOf(BlockTypes.SLIDESHOW) ? (
-              <button
-                className="artibox-tooltip-btn"
-                style={styles.blockBtn}
-                type="button">
-                <Icons.SLIDER fill={isHover ? '#242424' : '#DBDBDB'} />
-              </button>
-            ) : null}
-            {~availableTypes.indexOf(BlockTypes.YOUTUBE) ? (
-              <div style={styles.anchorWrapper}>
-                <button
-                  onClick={() => setYouTubeURLInputShow(!isYouTubeURLInputShown)}
-                  className="artibox-tooltip-btn"
-                  style={styles.blockBtn}
-                  type="button">
-                  <Icons.VIDEO fill={isHover ? '#242424' : '#DBDBDB'} />
-                </button>
-                <div style={isYouTubeURLInputShown ? styles.urlInputBlockShown : styles.urlInputBlock}>
-                  <h6 style={styles.urlInputTitle}>YouTube URL:</h6>
-                  <div style={styles.urlInputWrapper}>
-                    <input
-                      onKeyPress={({ which }) => {
-                        if (isVaildYouTubeURL && which === 13) {
-                          dispatch({
-                            type: Actions.CHANGE_TYPE,
-                            id: blockId,
-                            newType: BlockTypes.YOUTUBE,
-                            content: getYouTubeId(youTubeURL),
-                          });
-
-                          setYouTubeURLInputShow(false);
-                        }
-                      }}
-                      ref={youtubeInput}
-                      onChange={({ target }) => setYouTubeURL(target.value)}
-                      value={youTubeURL}
-                      style={styles.urlInput}
-                      placeholder="https://www.youtube.com/watch?v=xxxxxxx"
-                      type="text" />
-                    {isVaildYouTubeURL ? (
-                      <button
-                        onClick={() => {
-                          dispatch({
-                            type: Actions.CHANGE_TYPE,
-                            id: blockId,
-                            newType: BlockTypes.YOUTUBE,
-                            content: getYouTubeId(youTubeURL),
-                          });
-
-                          setYouTubeURLInputShow(false);
-                        }}
-                        style={styles.insertButton}
-                        type="button">
-                        Insert!
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            ) : null}
-            {~availableTypes.indexOf(BlockTypes.INSTAGRAM) ? (
-              <button
-                className="artibox-tooltip-btn"
-                style={styles.blockBtn}
-                type="button">
-                <Icons.INSTAGRAM fill={isHover ? '#242424' : '#DBDBDB'} />
-              </button>
-            ) : null}
-            {~availableTypes.indexOf(BlockTypes.FACEBOOK) ? (
-              <button
-                className="artibox-tooltip-btn"
-                style={styles.blockBtn}
-                type="button">
-                <Icons.FACEBOOK fill={isHover ? '#242424' : '#DBDBDB'} />
-              </button>
-            ) : null}
-          </Fragment>
-        ) : null}
+        {availableButtons}
       </div>
     </Fragment>
   );

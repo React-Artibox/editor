@@ -16,6 +16,7 @@
     "window",
     "Image",
     "Node",
+    "YT",
   },
   "parser": "babel-eslint",
   "extends": [

@@ -1,6 +1,11 @@
 // @flow
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+} from 'react';
 import { Dispatch as DispatchContext } from '../constants/context';
 import Actions from '../constants/actions';
 
@@ -77,7 +82,7 @@ function YouTube({
         },
       });
     }
-  }, [width, height]);
+  }, [width, height, content]);
 
   useEffect(() => {
     const { current } = container;
@@ -88,7 +93,7 @@ function YouTube({
       setWidth(containerWidth);
       setHeight(Math.round(containerWidth * 0.75));
     }
-  });
+  }, [container]);
 
   useEffect(() => {
     const { current } = container;
@@ -101,7 +106,7 @@ function YouTube({
       type: Actions.LOADED,
       id,
     });
-  }, []);
+  }, [dispatch, firstLoaded, id]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
@@ -112,11 +117,19 @@ function YouTube({
           style={styles.input}
           onKeyDown={({ which }) => {
             switch (which) {
+              case 13:
+                dispatch({
+                  type: Actions.NEW_LINE,
+                  at: id,
+                });
+                break;
+
               case 8:
                 dispatch({
                   type: Actions.REMOVE_BLOCK,
                   id,
                 });
+                break;
 
               default:
                 break;

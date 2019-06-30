@@ -6,6 +6,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useMemo,
 } from 'react';
 import Actions from '../constants/actions';
 import Icons from '../constants/icons';
@@ -19,6 +20,11 @@ import {
   baseStyles,
   metaStyles,
 } from '../styles/meta';
+import {
+  IMAGE_CAPTION,
+  IMAGE_LINK,
+  IMAGE_ALIGN,
+} from '../constants/features';
 
 const styles = {
   wrapper: {
@@ -227,7 +233,10 @@ function ImageComponent({
   firstLoaded,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
-  const { parseImageURL } = useContext(ConfigContext);
+  const {
+    parseImageURL,
+    features,
+  } = useContext(ConfigContext);
   const container = useRef();
   const descriptionTextarea = useRef();
   const linkTextInput = useRef();
@@ -406,6 +415,39 @@ function ImageComponent({
     });
   }, [container, id, dispatch, firstLoaded]);
 
+  const menuItems = useMemo(() => (
+    <Fragment>
+      {features & IMAGE_CAPTION ? (
+        <button
+          onClick={() => toggleDescriptionModalShown(!isDescriptionModalShown)}
+          className="artibox-tooltip-btn"
+          style={styles.imageMenuBtn}
+          type="button">
+          <Icons.REMARK
+            fill={(menuHover || description) ? '#242424' : '#DBDBDB'} />
+        </button>
+      ) : null}
+      {features & IMAGE_LINK ? (
+        <button
+          onClick={() => toggleLinkModalShown(!isLinkModalShown)}
+          className="artibox-tooltip-btn"
+          style={styles.imageMenuBtn}
+          type="button">
+          <Icons.LINK fill={menuHover || isURL(linkURL) ? '#242424' : '#DBDBDB'} />
+        </button>
+      ) : null}
+      {features & IMAGE_ALIGN ? (
+        <button
+          onClick={setNextAlign(align, setAlign)}
+          className="artibox-tooltip-btn"
+          style={styles.imageMenuBtn}
+          type="button">
+          {getAlignIcon(align, menuHover)}
+        </button>
+      ) : null}
+    </Fragment>
+  ), [features, menuHover, description, align, isDescriptionModalShown, isLinkModalShown, linkURL]);
+
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
       <div ref={container} style={getAlignedStyle(align, styles.mainContent)}>
@@ -417,6 +459,13 @@ function ImageComponent({
           style={styles.input}
           onKeyDown={({ which }) => {
             switch (which) {
+              case 13:
+                dispatch({
+                  type: Actions.NEW_LINE,
+                  at: id,
+                });
+                break;
+
               case 8:
                 dispatch({
                   type: Actions.REMOVE_BLOCK,
@@ -454,28 +503,7 @@ function ImageComponent({
               onMouseEnter={() => setMenuHover(true)}
               onMouseLeave={() => setMenuHover(false)}
               style={styles.imageMenu}>
-              <button
-                onClick={() => toggleDescriptionModalShown(!isDescriptionModalShown)}
-                className="artibox-tooltip-btn"
-                style={styles.imageMenuBtn}
-                type="button">
-                <Icons.REMARK
-                  fill={(menuHover || description) ? '#242424' : '#DBDBDB'} />
-              </button>
-              <button
-                onClick={() => toggleLinkModalShown(!isLinkModalShown)}
-                className="artibox-tooltip-btn"
-                style={styles.imageMenuBtn}
-                type="button">
-                <Icons.LINK fill={menuHover || isURL(linkURL) ? '#242424' : '#DBDBDB'} />
-              </button>
-              <button
-                onClick={setNextAlign(align, setAlign)}
-                className="artibox-tooltip-btn"
-                style={styles.imageMenuBtn}
-                type="button">
-                {getAlignIcon(align, menuHover)}
-              </button>
+              {menuItems}
             </div>
             <div
               style={(

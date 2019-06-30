@@ -1,9 +1,15 @@
 // @flow
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Config as ConfigContext } from './constants/context';
 import { fileToBase64URL } from './parsers/image';
-import BlockTypes from './constants/blockTypes';
+import {
+  TEXT_BLOCK_FULL,
+  IMAGE_BLOCK_BASIC,
+  IMAGE_ALIGN,
+  YOUTUBE_BLOCK,
+  SPLIT_LINE,
+} from './constants/features';
 
 type Props = {
   children: any,
@@ -16,13 +22,13 @@ type Props = {
 const defaultOptions = {
   parseImageFile: fileToBase64URL,
   parseImageURL: null,
-  availableTypes: [
-    BlockTypes.IMAGE,
-    BlockTypes.YOUTUBE,
-    // BlockTypes.SLIDESHOW,
-    // BlockTypes.INSTAGRAM,
-    // BlockTypes.FACEBOOK,
-  ],
+  features: (
+    TEXT_BLOCK_FULL
+    | IMAGE_BLOCK_BASIC
+    | IMAGE_ALIGN
+    | YOUTUBE_BLOCK
+    | SPLIT_LINE
+  ),
 };
 
 function ArtiboxProvider({

@@ -327,12 +327,10 @@ function SelectionContextMenu({
 
   const markLink = useCallback(({
     URL,
-    OPEN_WINDOW,
   }) => {
     addToMarkers({
       TYPE: 'LINK',
       URL,
-      OPEN_WINDOW,
     });
 
     setLinkModalShown(false);

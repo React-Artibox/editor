@@ -481,8 +481,6 @@ function Text({
   );
 }
 
-Text.TAGS = 'TAGS';
-
 Text.defaultProps = {
   placeholder: '在此輸入內容',
 };

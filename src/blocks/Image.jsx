@@ -248,7 +248,6 @@ function ImageComponent({
   const [description, setDescription] = useState(meta[ImageComponent.DESCRIPTION]);
   const [isLinkModalShown, toggleLinkModalShown] = useState(false);
   const [linkURL, setLinkURL] = useState(meta[ImageComponent.LINK]);
-  const [linkSelf, setLinkSelf] = useState(meta[ImageComponent.LINK_SELF]);
   const [align, setAlign] = useState(meta[ImageComponent.ALIGN]);
 
   // Draw on canvas
@@ -377,7 +376,6 @@ function ImageComponent({
         id,
         meta: {
           [ImageComponent.LINK]: linkURL,
-          [ImageComponent.LINK_SELF]: linkSelf,
         },
       });
 
@@ -389,7 +387,7 @@ function ImageComponent({
         }
       }
     }
-  }, [isLinkModalShown, container, dispatch, id, firstLoaded, linkURL, linkSelf]);
+  }, [isLinkModalShown, container, dispatch, id, firstLoaded, linkURL]);
 
   // Update Align
   useEffect(() => {
@@ -489,7 +487,8 @@ function ImageComponent({
                 <a
                   href={linkURL}
                   style={styles.activeLink}
-                  target={linkSelf ? '_self' : '_blank'}>
+                  target="_blank"
+                  rel="noopener noreferrer">
                   <Icons.LINK fill="#777" />
                 </a>
               ) : null}
@@ -526,17 +525,6 @@ function ImageComponent({
             <div style={isLinkModalShown ? styles.linkEditorShown : styles.linkEditor}>
               <h6 style={styles.metaModalTitle}>Link</h6>
               <button
-                onClick={() => setLinkSelf(!linkSelf)}
-                style={styles.linkTargetButton}
-                type="button">
-                <span style={styles.checkboxWrapper}>
-                  {linkSelf ? null : (
-                    <span style={styles.checkboxChecked} />
-                  )}
-                </span>
-                Open new window
-              </button>
-              <button
                 onClick={() => toggleLinkModalShown(false)}
                 style={styles.removeBtn}
                 type="button">
@@ -566,8 +554,6 @@ function ImageComponent({
 ImageComponent.DESCRIPTION = 'DESCRIPTION';
 
 ImageComponent.LINK = 'LINK';
-
-ImageComponent.LINK_SELF = 'LINK_SELF';
 
 ImageComponent.ALIGN = 'ALIGN';
 

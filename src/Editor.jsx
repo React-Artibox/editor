@@ -5,6 +5,7 @@ import React, {
   useReducer,
   useEffect,
   useRef,
+  useMemo,
 } from 'react';
 import uuid from 'uuid/v4';
 import './main.css';
@@ -40,6 +41,7 @@ const styles = {
     color: '#DBDBDB',
     fontWeight: 300,
     letterSpacing: 1,
+    padding: '6px 12px 6px 14px',
   },
 };
 
@@ -99,29 +101,6 @@ function reducer(state, action) {
               meta: {
                 ...state.blocks[updateIndex].meta,
                 ...action.meta,
-              },
-            },
-            ...state.blocks.slice(updateIndex + 1),
-          ],
-        };
-      }
-
-      return state;
-    }
-
-    case Actions.SET_TAGS: {
-      const updateIndex = state.blocks.findIndex(block => action.id === block.id);
-
-      if (~updateIndex) {
-        return {
-          ...state,
-          blocks: [
-            ...state.blocks.slice(0, updateIndex),
-            {
-              ...state.blocks[updateIndex],
-              meta: {
-                ...state.blocks[updateIndex].meta,
-                tags: action.tags,
               },
             },
             ...state.blocks.slice(updateIndex + 1),
@@ -366,6 +345,14 @@ function Editor({
     }
   }, [state, firstLoaded, isYouTubeAPILoaded]);
 
+  const placeholderZone = useMemo(() => (
+    state.blocks.length && !state.blocks[state.blocks.length - 1].content ? null : (
+      <span style={styles.blockCreatorPlaceholder}>
+        {placeholder}
+      </span>
+    )
+  ), [state.blocks, placeholder]);
+
   return (
     <DispatchContext.Provider value={dispatch}>
       <div ref={container} style={styles.wrapper}>
@@ -434,11 +421,7 @@ function Editor({
             }
           }}
           style={styles.blockCreator}>
-          {state.blocks.length ? null : (
-            <span style={styles.blockCreatorPlaceholder}>
-              {placeholder}
-            </span>
-          )}
+          {placeholderZone}
         </div>
       </div>
     </DispatchContext.Provider>

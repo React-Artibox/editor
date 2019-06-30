@@ -59,7 +59,6 @@ function LinkModal({
   const dispatch = useContext(DispatchContext);
   const input = useRef();
   const [url, setURL] = useState('');
-  const [newWindow, setNewWindow] = useState(true);
 
   // Auto Focus On Link Modal Open
   useEffect(() => {
@@ -70,17 +69,11 @@ function LinkModal({
     }
   }, [dispatch]);
 
-  const toggleNewWindow = useCallback(() => setNewWindow(!newWindow), [newWindow]);
-
-  const toggleCheckbox = useMemo(() => (
-    newWindow ? <span style={metaStyles.checkboxChecked} /> : null), [newWindow]);
-
   const updateURL = useCallback(({ target }) => setURL(target.value), []);
 
   const submit = useCallback(() => onSubmit({
-    OPEN_WINDOW: newWindow,
     URL: url,
-  }), [newWindow, url, onSubmit]);
+  }), [url, onSubmit]);
 
   const checkSubmit = useCallback((e) => {
     const { which, shiftKey } = e;
@@ -109,15 +102,6 @@ function LinkModal({
       <div style={styles.linkEditor}>
         <h6 style={metaStyles.metaModalTitle}>Link</h6>
         <button
-          onClick={toggleNewWindow}
-          style={metaStyles.linkTargetButton}
-          type="button">
-          <span style={metaStyles.checkboxWrapper}>
-            {toggleCheckbox}
-          </span>
-          Open new window
-        </button>
-        <button
           onClick={close}
           style={metaStyles.removeBtn}
           type="button">
@@ -136,7 +120,5 @@ function LinkModal({
     </div>
   );
 }
-
-LinkModal.TAGS = 'tags';
 
 export default LinkModal;

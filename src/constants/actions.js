@@ -8,5 +8,4 @@ export default {
   FOCUS: Symbol('Artibox/Action/FOCUS'),
   CHANGE_TYPE: Symbol('Artibox/Action/CHANGE_TYPE'),
   SET_METADATA: Symbol('Artibox/Action/SET_METADATA'),
-  SET_TAGS: Symbol('Artibox/Action/SET_TAGS'),
 };

@@ -1,23 +1,20 @@
 // @flow
 /* eslint no-param-reassign: 0 */
+
 import React, {
   useContext,
   useEffect,
   useRef,
   useState,
+  useMemo,
+  useCallback,
+  Fragment,
 } from 'react';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
-import TagTypes from '../constants/tags';
 import Tooltip from '../tools/Tooltip';
-import Icons from '../constants/icons';
+import SelectionContextMenu from '../components/SelectionContextMenu';
 import { Dispatch as DispatchContext } from '../constants/context';
-import { getSelectedRangeOnPreview } from '../helpers/range.js';
-import {
-  updateAllTagsPosition,
-  updateTags,
-} from '../helpers/middleware.js';
-import LinkModal from '../components/LinkModal';
 
 const BASIC_HEIGHT = {
   [BlockTypes.TEXT]: 26,
@@ -158,6 +155,42 @@ const styles = {
   },
 };
 
+function addTagToList(tags, marker, content) {
+  switch (marker.TYPE) {
+    case 'HIGHLIGHT':
+      tags.push(
+        <span
+          style={styles.highlight}
+          key={`${marker.FROM}:${marker.TO}`}>
+          {content.substring(marker.FROM, marker.TO)}
+        </span>
+      );
+      break;
+
+    case 'LINK':
+      tags.push(
+        <a
+          href={marker.URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={styles.link}
+          key={`${marker.FROM}:${marker.TO}`}>
+          {content.substring(marker.FROM, marker.TO)}
+        </a>
+      );
+      break;
+
+    default:
+      tags.push(
+        <span
+          key={`${marker.FROM}:${marker.TO}`}>
+          {content.substring(marker.FROM, marker.TO)}
+        </span>
+      );
+      break;
+  }
+}
+
 function Text({
   content,
   id,
@@ -165,129 +198,73 @@ function Text({
   focus,
   firstLoaded,
   meta,
-}: BlockProps) {
+  placeholder,
+}: BlockProps & {
+  placeholder?: ?string,
+}) {
   const dispatch = useContext(DispatchContext);
-  const [menu, setMenu] = useState({
-    isShown: false,
-    x: 0,
-    y: 0,
-    from: 0,
-    to: 0,
-  });
-  const [isHover, setHover] = useState(false);
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [currentCaretIdx, setCurrentCaretIdx] = useState(0);
+  const [currentCaret, setCurrentCaret] = useState(0);
   const textarea = useRef();
   const display = useRef();
-  const textmenu = useRef();
-  // textarea onSelect evt
-  function onSelect() {
-    const {
-      current: input,
-    } = textarea;
 
-    if (input.selectionStart === input.selectionEnd) {
-      if (menu && menu.isShown) {
-        setMenu({
-          ...menu,
-          isShown: false,
-        });
-      }
-      return;
-    }
+  const wrappedContent = useMemo(() => {
+    const tags = [];
+    const markers = (meta.MARKERS || []);
 
-    const previewRange = getSelectedRangeOnPreview(textarea, display);
-    const {
-      x: parentX,
-      y: parentY,
-    } = input.getBoundingClientRect();
-    const {
-      x: selectionX,
-      y: selectionY,
-      width,
-    } = previewRange.getBoundingClientRect();
-    const { width: menuWidth } = textmenu.current.getBoundingClientRect();
+    if (markers.length === 0) return content;
 
-    setMenu({
-      ...menu,
-      isShown: true,
-      x: (selectionX + ((width - menuWidth) / 2)) - parentX,
-      y: selectionY - parentY - 40,
-      from: input.selectionStart,
-      to: input.selectionEnd,
-    });
-  }
+    markers.forEach((marker, index) => {
+      if (index === 0) {
+        tags.push(
+          <span
+            key={`0:${marker.FROM}`}>
+            {content.substring(0, marker.FROM)}
+          </span>
+        );
 
-  function wrapTags() {
-    const wrappedStrings = [];
-    const tags = (meta && meta.tags) || [];
-    if (!tags.length) return content;
+        addTagToList(tags, marker, content);
 
-    let workingTagIdx = 0;
-    let nodeContent = '';
-    let concatingType = null;
-
-    Array.from(`${content} `).forEach((char, index) => {
-      if (index === tags[workingTagIdx].to) {
-        // Flush
-        switch (concatingType) {
-          case TagTypes.HIGHLIGHT:
-            wrappedStrings.push((
-              <span
-                key={workingTagIdx}
-                style={styles.highlight}>
-                {nodeContent}
-              </span>
-            ));
-
-            nodeContent = '';
-            break;
-
-          case TagTypes.LINK:
-            wrappedStrings.push((
-              <a
-                rel="noopener noreferrer"
-                href={tags[workingTagIdx].url}
-                target="_blank"
-                key={workingTagIdx}
-                style={styles.link}>
-                {nodeContent}
-              </a>
-            ));
-
-            nodeContent = '';
-            break;
-
-          default:
-            wrappedStrings.push(nodeContent);
-
-            nodeContent = '';
-            break;
+        if (meta.MARKERS.length === 1) {
+          tags.push(
+            <span
+              key={`${marker.TO}:`}>
+              {content.substring(marker.TO)}
+            </span>
+          );
         }
 
-        if (tags[workingTagIdx + 1]) {
-          workingTagIdx += 1;
-        }
+        return;
       }
 
-      if (index === tags[workingTagIdx].from) {
-        // Flush Plain Text
-        wrappedStrings.push(nodeContent);
-        nodeContent = '';
-        concatingType = tags[workingTagIdx].type;
+      const prevMarker = meta.MARKERS[index - 1];
+
+      if (prevMarker.TO !== marker.FROM) {
+        tags.push(
+          <span
+            key={`${prevMarker.TO}:${marker.FROM}`}>
+            {content.substring(prevMarker.TO, marker.FROM)}
+          </span>
+        );
       }
 
-      nodeContent = `${nodeContent}${char}`;
+      addTagToList(tags, marker, content);
+
+      if (index === (meta.MARKERS.length - 1)) {
+        tags.push(
+          <span
+            key={`${marker.TO}:`}>
+            {content.substring(marker.TO)}
+          </span>
+        );
+      }
     });
-
-    wrappedStrings.push(nodeContent);
 
     return (
-      <>
-        {wrappedStrings}
-      </>
+      <Fragment>
+        {tags}
+      </Fragment>
     );
-  }
+  }, [meta, content]);
 
   useEffect(() => {
     const { current } = textarea;
@@ -326,164 +303,183 @@ function Text({
     });
   }, [dispatch, firstLoaded, id]);
 
+  const wrapperStyles = useMemo(() => ({
+    ...(focus ? styles.focusWrapper : styles.wrapper),
+    height: BASIC_HEIGHT[type],
+    margin: type === BlockTypes.QUOTE ? '12px 0' : 0,
+  }), [focus, type]);
+
+  const contentStyles = useMemo(() => (
+    type === BlockTypes.QUOTE ? styles.mainContentQuote : styles.mainContent
+  ), [type]);
+
+  const onFocus = useCallback(() => dispatch({
+    type: Actions.FOCUS,
+    id,
+  }), [id, dispatch]);
+
+  const onKeyDown = useCallback((e) => {
+    const { which, shiftKey, target } = e;
+
+    setCurrentCaret(target.selectionEnd);
+
+    switch (which) {
+      case 13:
+        if (shiftKey) break;
+
+        e.preventDefault();
+
+        dispatch({
+          type: Actions.NEW_LINE,
+          at: id,
+        });
+        break;
+
+      case 8:
+        if (content === '') {
+          dispatch({
+            type: Actions.REMOVE_BLOCK,
+            id,
+          });
+        }
+        break;
+      default:
+        break;
+    }
+  }, [content, dispatch, id]);
+
+  const onInput = useCallback(({ target }) => {
+    target.style.height = `${BASIC_HEIGHT[type]}px`;
+
+    const newHeight = `${target.scrollHeight}px`;
+    target.style.height = newHeight;
+    target.parentNode.parentNode.style.height = newHeight;
+  }, [type]);
+
+  const onChange = useCallback(({ target }) => {
+    const diff = target.selectionStart - currentCaret;
+
+    const MARKERS = (meta.MARKERS || []).reduce((markers, marker) => {
+      if (currentCaret > marker.TO && target.selectionStart < marker.FROM) return markers;
+
+      if (currentCaret > marker.TO) {
+        if (target.selectionStart < marker.TO) {
+          return [
+            ...markers,
+            {
+              ...marker,
+              TO: target.selectionStart,
+            },
+          ];
+        }
+
+        return [
+          ...markers,
+          marker,
+        ];
+      }
+
+      if (currentCaret <= marker.FROM) {
+        return [
+          ...markers,
+          {
+            ...marker,
+            FROM: marker.FROM + diff,
+            TO: marker.TO + diff,
+          },
+        ];
+      }
+
+      if (currentCaret > marker.FROM && target.selectionStart < marker.FROM) {
+        return [
+          ...markers,
+          {
+            ...marker,
+            FROM: marker.FROM - (marker.FROM - target.selectionStart),
+            TO: marker.TO + diff,
+          },
+        ];
+      }
+
+      return [
+        ...markers,
+        {
+          ...marker,
+          TO: marker.TO + diff,
+        },
+      ];
+    }, []);
+
+    dispatch({
+      type: Actions.CHANGE_AND_UPDATE_META,
+      id,
+      content: target.value,
+      meta: {
+        ...meta,
+        MARKERS,
+      },
+    });
+
+    setCurrentCaret(target.selectionEnd);
+  }, [meta, id, dispatch, currentCaret]);
+
+  const onPaste = useCallback(({ target }) => {
+    setCurrentCaret(target.selectionEnd);
+  }, []);
+
+  const textareaStyles = useMemo(() => {
+    const lineHeight = `${BASIC_HEIGHT[type]}px`;
+
+    return {
+      ...styles.input,
+      fontSize: FONT_SIZE[type],
+      height: BASIC_HEIGHT[type],
+      lineHeight,
+      fontWeight: FONT_WEIGHT[type],
+      letterSpacing: LETTER_SPACING[type],
+      color: COLOR[type],
+    };
+  }, [type]);
+
+  const fakeValueStyles = useMemo(() => {
+    const lineHeight = `${BASIC_HEIGHT[type]}px`;
+
+    return {
+      ...styles.display,
+      fontSize: FONT_SIZE[type],
+      lineHeight,
+      fontWeight: FONT_WEIGHT[type],
+      letterSpacing: LETTER_SPACING[type],
+      color: COLOR[type],
+    };
+  }, [type]);
+
   return (
     <div
-      style={{
-        ...(focus ? styles.focusWrapper : styles.wrapper),
-        height: BASIC_HEIGHT[type],
-        margin: type === BlockTypes.QUOTE ? '12px 0' : 0,
-      }}>
+      style={wrapperStyles}>
       {type === BlockTypes.QUOTE ? <span style={styles.quoteAnchor} /> : null}
-      <div style={type === BlockTypes.QUOTE ? styles.mainContentQuote : styles.mainContent}>
+      <div style={contentStyles}>
         <textarea
           ref={textarea}
-          onFocus={() => dispatch({
-            type: Actions.FOCUS,
-            id,
-          })}
-          onSelect={() => onSelect()}
-          onClick={({ target }) => setCurrentCaretIdx(target.selectionEnd)}
-          onKeyDown={(e) => {
-            const { which, shiftKey } = e;
-
-            switch (which) {
-              case 13:
-                if (shiftKey) break;
-
-                e.preventDefault();
-
-                dispatch({
-                  type: Actions.NEW_LINE,
-                  at: id,
-                });
-                break;
-
-              case 8:
-                if (content === '') {
-                  dispatch({
-                    type: Actions.REMOVE_BLOCK,
-                    id,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          }}
-          onKeyUp={({ target, which }) => {
-            switch (which) {
-              case 37: // left
-              case 38: // top
-              case 39: // right
-              case 40: // down
-                setCurrentCaretIdx(target.selectionEnd);
-                break;
-              default:
-                break;
-            }
-          }}
-          onInput={({ target }) => {
-            target.style.height = `${BASIC_HEIGHT[type]}px`;
-
-            const newHeight = `${target.scrollHeight}px`;
-            target.style.height = newHeight;
-            target.parentNode.parentNode.style.height = newHeight;
-          }}
+          onFocus={onFocus}
           value={content}
-          onChange={({ target }) => {
-            const newTags = updateAllTagsPosition({
-              prevCursorIdx: currentCaretIdx,
-              nextCursorIdx: target.selectionStart,
-              tags: (meta && meta[Text.TAGS]) || [],
-              prevContent: content,
-              nextContent: target.value,
-            });
-
-            dispatch({
-              type: Actions.CHANGE_AND_UPDATE_META,
-              id,
-              content: target.value,
-              meta: {
-                tags: newTags,
-              },
-            });
-
-            setCurrentCaretIdx(target.selectionEnd);
-          }}
+          onInput={onInput}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
           className="artibox-input"
-          placeholder="在此輸入內容"
-          style={{
-            ...styles.input,
-            fontSize: FONT_SIZE[type],
-            height: BASIC_HEIGHT[type],
-            lineHeight: `${BASIC_HEIGHT[type]}px`,
-            fontWeight: FONT_WEIGHT[type],
-            letterSpacing: LETTER_SPACING[type],
-            color: COLOR[type],
-          }} />
+          placeholder={placeholder}
+          style={textareaStyles} />
         <div
           ref={display}
-          style={{
-            ...styles.display,
-            fontSize: FONT_SIZE[type],
-            lineHeight: `${BASIC_HEIGHT[type]}px`,
-            fontWeight: FONT_WEIGHT[type],
-            letterSpacing: LETTER_SPACING[type],
-            color: COLOR[type],
-          }}>
-          {wrapTags()}
+          style={fakeValueStyles}>
+          {wrappedContent}
+          <SelectionContextMenu
+            blockId={id}
+            meta={meta}
+            display={display}
+            textarea={textarea} />
         </div>
-        {(() => {
-          if (showLinkInput) {
-            return (
-              <LinkModal
-                {...menu}
-                id={id}
-                content={content}
-                firstLoaded={firstLoaded}
-                setShowLinkInput={setShowLinkInput}
-                meta={meta} />
-            );
-          }
-
-          return (
-            <div
-              ref={textmenu}
-              onMouseEnter={() => setHover(true)}
-              onMouseLeave={() => setHover(false)}
-              style={{
-                ...styles.textmenu,
-                ...(menu && menu.isShown ? styles.textmenuShown : {}),
-                left: menu ? menu.x : 0,
-                top: menu ? menu.y : 0,
-              }}>
-              <button
-                onClick={() => updateTags({
-                  originContent: content,
-                  contentId: id,
-                  meta,
-                  dispatch,
-                  newTag: {
-                    type: TagTypes.HIGHLIGHT,
-                    from: (menu && menu.from) || 0,
-                    to: (menu && menu.to) || 0,
-                  },
-                })}
-                className="artibox-tooltip-btn"
-                style={styles.textmenuBtn}
-                type="button">
-                <Icons.HIGHLIGHT fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
-              </button>
-              <button
-                onClick={() => setShowLinkInput(true)}
-                className="artibox-tooltip-btn"
-                style={styles.textmenuBtn}
-                type="button">
-                <Icons.LINK fill={(isHover ? '#f5f5f5' : '#c1c7cd')} />
-              </button>
-            </div>
-          );
-        })()}
         {focus ? (
           <div style={styles.tooltipWrapper}>
             <Tooltip
@@ -497,6 +493,10 @@ function Text({
   );
 }
 
-Text.TAGS = 'tags';
+Text.TAGS = 'TAGS';
+
+Text.defaultProps = {
+  placeholder: '在此輸入內容',
+};
 
 export default Text;

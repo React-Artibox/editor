@@ -5,17 +5,16 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useCallback,
+  useMemo,
 } from 'react';
-import Actions from '../constants/actions';
-import TagTypes from '../constants/tags';
 import { Dispatch as DispatchContext } from '../constants/context';
 import { metaStyles } from '../styles/meta';
-import { updateTags } from '../helpers/middleware.js';
 
 const styles = {
   wrapper: {
     position: 'absolute',
-    zIndex: 10,
+    zIndex: 20,
     width: 'auto',
     height: 'auto',
     backgroundColor: '#1B2733',
@@ -25,6 +24,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    pointerEvents: 'auto',
   },
   linkEditor: {
     width: 360,
@@ -46,93 +46,79 @@ const styles = {
 };
 
 function LinkModal({
-  id,
-  firstLoaded,
-  meta,
-  setShowLinkInput,
-  from,
-  to,
-  x,
-  y,
-  content,
+  onSubmit,
+  top,
+  left,
+  close,
 }: {
-  id: string,
-  firstLoaded: boolean,
-  meta: {
-    tags: Array<{
-      type: string,
-    }>,
-  },
-  setShowLinkInput: Function,
-  from: number,
-  to: number,
-  x: number,
-  y: number,
-  content: string,
+  onSubmit: Function,
+  top: Function,
+  left: Function,
+  close: Function,
 }) {
   const dispatch = useContext(DispatchContext);
-  const linkTextInput = useRef();
-  const existCurrentMeta = Array.isArray(meta[LinkModal.TAGS])
-    ? meta[LinkModal.TAGS].find(t => (t.from === from && t.to === to))
-    : null;
-  const [currentMeta, setMeta] = useState(existCurrentMeta || {});
-
-  function onSubmit() {
-    updateTags({
-      originContent: content,
-      contentId: id,
-      meta,
-      dispatch,
-      newTag: {
-        ...currentMeta,
-        type: TagTypes.LINK,
-        from,
-        to,
-      },
-    });
-
-    setShowLinkInput(false);
-  }
+  const input = useRef();
+  const [url, setURL] = useState('');
+  const [newWindow, setNewWindow] = useState(true);
 
   // Auto Focus On Link Modal Open
   useEffect(() => {
-    dispatch({
-      type: Actions.FOCUS,
-      id,
-    });
+    const { current } = input;
 
-    const { current } = linkTextInput;
-
-    if (current && firstLoaded) {
+    if (current) {
       current.focus();
     }
-  }, [dispatch, firstLoaded, id]);
+  }, [dispatch]);
+
+  const toggleNewWindow = useCallback(() => setNewWindow(!newWindow), [newWindow]);
+
+  const toggleCheckbox = useMemo(() => (
+    newWindow ? <span style={metaStyles.checkboxChecked} /> : null), [newWindow]);
+
+  const updateURL = useCallback(({ target }) => setURL(target.value), []);
+
+  const submit = useCallback(() => onSubmit({
+    OPEN_WINDOW: newWindow,
+    URL: url,
+  }), [newWindow, url, onSubmit]);
+
+  const checkSubmit = useCallback((e) => {
+    const { which, shiftKey } = e;
+
+    switch (which) {
+      case 13:
+        if (shiftKey) break;
+
+        e.preventDefault();
+
+        submit();
+        break;
+      default:
+        break;
+    }
+  }, [submit]);
+
+  const wrapperStyles = useMemo(() => ({
+    ...styles.wrapper,
+    left,
+    top,
+  }), [left, top]);
 
   return (
-    <div
-      style={{
-        ...styles.wrapper,
-        left: x ? x - 20 : 0,
-        top: y ? y - 60 : 0,
-      }}>
+    <div style={wrapperStyles}>
       <div style={styles.linkEditor}>
         <h6 style={metaStyles.metaModalTitle}>Link</h6>
         <button
-          onClick={() => setMeta({
-            ...currentMeta,
-            newWindow: !currentMeta.newWindow,
-          })}
+          onClick={toggleNewWindow}
           style={metaStyles.linkTargetButton}
           type="button">
           <span style={metaStyles.checkboxWrapper}>
-            {currentMeta.newWindow ? (
-              <span style={metaStyles.checkboxChecked} />
-            ) : null}
+            {toggleCheckbox}
           </span>
           Open new window
         </button>
         <button
-          onClick={() => onSubmit()}
+          onClick={close}
           style={metaStyles.removeBtn}
           type="button">
           <span style={metaStyles.removeBtnLine1} />
@@ -140,28 +126,11 @@ function LinkModal({
         </button>
         <input
           type="text"
-          ref={linkTextInput}
-          value={(currentMeta && currentMeta.url) || ''}
+          ref={input}
+          value={url}
           placeholder="https://"
-          onKeyDown={(e) => {
-            const { which, shiftKey } = e;
-
-            switch (which) {
-              case 13:
-                if (shiftKey) break;
-
-                e.preventDefault();
-
-                onSubmit();
-                break;
-              default:
-                break;
-            }
-          }}
-          onChange={({ target }) => setMeta({
-            ...currentMeta,
-            url: target.value,
-          })}
+          onKeyDown={checkSubmit}
+          onChange={updateURL}
           style={metaStyles.metaModalInput} />
       </div>
     </div>

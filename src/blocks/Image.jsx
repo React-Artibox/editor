@@ -1,6 +1,12 @@
 // @flow
 
-import React, { Fragment, useContext, useState, useRef, useEffect } from 'react';
+import React, {
+  Fragment,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+} from 'react';
 import Actions from '../constants/actions';
 import Icons from '../constants/icons';
 import {
@@ -165,14 +171,14 @@ const styles = {
 function getAlignIcon(align, menuHover) {
   switch (align) {
     case Aligns.RIGHT:
-      return <Icons.ALIGN_RIGHT fill={menuHover ? '#242424' : '#DBDBDB'} />
+      return <Icons.ALIGN_RIGHT fill={menuHover ? '#242424' : '#DBDBDB'} />;
 
     case Aligns.CENTER:
-      return <Icons.ALIGN_CENTER fill={menuHover ? '#242424' : '#DBDBDB'} />
+      return <Icons.ALIGN_CENTER fill={menuHover ? '#242424' : '#DBDBDB'} />;
 
     case Aligns.LEFT:
     default:
-      return <Icons.ALIGN_LEFT fill={menuHover ? '#242424' : '#DBDBDB'} />
+      return <Icons.ALIGN_LEFT fill={menuHover ? '#242424' : '#DBDBDB'} />;
   }
 }
 
@@ -226,7 +232,6 @@ function ImageComponent({
   const descriptionTextarea = useRef();
   const linkTextInput = useRef();
 
-  const [src, setSrc] = useState(null);
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
   const [menuHover, setMenuHover] = useState(false);
@@ -417,6 +422,7 @@ function ImageComponent({
                   type: Actions.REMOVE_BLOCK,
                   id,
                 });
+                break;
 
               default:
                 break;
@@ -471,7 +477,10 @@ function ImageComponent({
                 {getAlignIcon(align, menuHover)}
               </button>
             </div>
-            <div style={isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor}>
+            <div
+              style={(
+                isDescriptionModalShown ? styles.descriptionEditorShown : styles.descriptionEditor
+              )}>
               <h6 style={styles.metaModalTitle}>Caption</h6>
               <button
                 onClick={() => toggleDescriptionModalShown(false)}

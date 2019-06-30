@@ -2,8 +2,6 @@
 
 import React, { useContext, useEffect, useRef } from 'react';
 import Actions from '../constants/actions';
-import BlockTypes from '../constants/blockTypes';
-import Tooltip from '../tools/Tooltip';
 import { Dispatch as DispatchContext } from '../constants/context';
 
 const styles = {
@@ -49,7 +47,6 @@ const styles = {
 function Line({
   content,
   id,
-  type,
   focus,
   firstLoaded,
 }: BlockProps) {
@@ -67,7 +64,7 @@ function Line({
       type: Actions.LOADED,
       id,
     });
-  }, []);
+  }, [textarea, id, firstLoaded, dispatch]);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
@@ -87,6 +84,7 @@ function Line({
                     id,
                   });
                 }
+                break;
 
               default:
                 break;

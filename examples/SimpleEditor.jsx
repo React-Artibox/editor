@@ -33,19 +33,19 @@ function SimpleEditor() {
       },
     }, {
       type: 'TEXT',
-      content: 'Hello ! Here may be a link or a highlight.',
+      content: '0123456789012345678901234567890',
       meta: {
-        tags: [{
-          type: 'LINK',
-          from: 22,
-          to: 26,
-          newWindow: true,
-          url: 'https://www.google.com',
-        }, {
-          type: 'HIGHLIGHT',
-          from: 32,
-          to: 41,
-        }],
+        // tags: [{
+        //   type: 'LINK',
+        //   from: 22,
+        //   to: 26,
+        //   newWindow: true,
+        //   url: 'https://www.google.com',
+        // }, {
+        //   type: 'HIGHLIGHT',
+        //   from: 32,
+        //   to: 41,
+        // }],
       },
     }, {
       type: 'YOUTUBE',

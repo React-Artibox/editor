@@ -394,6 +394,7 @@ function Editor({
               return (
                 <Text
                   {...block}
+                  placeholder={placeholder}
                   firstLoaded={firstLoaded}
                   key={block.id} />
               );

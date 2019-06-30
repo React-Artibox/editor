@@ -228,14 +228,23 @@ function SelectionContextMenu({
     <Icons.LINK fill={hoveredIcon === 'LINK' ? '#4a4a4a' : '#dbdbdb'} />
   ), [hoveredIcon]);
 
+  const eraseIcon = useMemo(() => (
+    <Icons.ERASE fill={hoveredIcon === 'ERASE' ? '#4a4a4a' : '#dbdbdb'} />
+  ), [hoveredIcon]);
+
   const onMouseEnterHighlight = useCallback(() => setHoverIcon('HIGHLIGHT'), []);
   const onMouseEnterLink = useCallback(() => setHoverIcon('LINK'), []);
+  const onMouseEnterErase = useCallback(() => setHoverIcon('ERASE'), []);
   const onMouseLeaveIcon = useCallback(() => setHoverIcon(null), []);
 
   const addToMarkers = useCallback((payload) => {
     const markerSet = Array.from(Array(cursorEnd - cursorStart))
       .reduce((map, n, index) => {
-        map.set(index + cursorStart, payload);
+        if (payload) {
+          map.set(index + cursorStart, payload);
+        } else {
+          map.delete(index + cursorStart);
+        }
 
         return map;
       }, (meta.MARKERS || []).reduce((map, marker) => {
@@ -297,6 +306,7 @@ function SelectionContextMenu({
   }, [cursorStart, cursorEnd, meta, dispatch, blockId]);
 
   const markHighlight = useCallback(() => addToMarkers({ TYPE: 'HIGHLIGHT' }), [addToMarkers]);
+
   const markLink = useCallback(({
     URL,
     OPEN_WINDOW,
@@ -309,11 +319,14 @@ function SelectionContextMenu({
 
     setLinkModalShown(false);
   }, [addToMarkers]);
+
   const showLinkModal = useCallback(() => {
     setShown(false);
 
     setLinkModalShown(true);
   }, []);
+
+  const eraseMark = useCallback(() => addToMarkers(null), [addToMarkers]);
 
   const linkModal = useMemo(() => (linkModalShown ? (
     <LinkModal
@@ -350,6 +363,15 @@ function SelectionContextMenu({
           style={styles.textmenuBtn}
           type="button">
           {linkIcon}
+        </button>
+        <button
+          onClick={eraseMark}
+          onMouseEnter={onMouseEnterErase}
+          onMouseLeave={onMouseLeaveIcon}
+          className="artibox-tooltip-btn"
+          style={styles.textmenuBtn}
+          type="button">
+          {eraseIcon}
         </button>
       </div>
       {linkModal}

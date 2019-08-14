@@ -341,6 +341,26 @@ function Text({
     }
   }, [content, dispatch, id]);
 
+  useEffect(() => {
+    function onResize() {
+      const { current } = textarea;
+
+      if (current) {
+        if (current.offsetHeight !== current.scrollHeight) {
+          current.style.height = `${BASIC_HEIGHT[type]}px`;
+
+          const newHeight = `${current.scrollHeight}px`;
+          current.style.height = newHeight;
+          current.parentNode.parentNode.style.height = newHeight;
+        }
+      }
+    }
+
+    window.addEventListener('resize', onResize, false);
+
+    return () => window.removeEventListener('resize', onResize, false);
+  }, [textarea, type]);
+
   const onInput = useCallback(({ target }) => {
     target.style.height = `${BASIC_HEIGHT[type]}px`;
 

@@ -13,7 +13,7 @@ export default (state) => {
     if (isYouTubeAPILoaded) return;
 
     // Detect YouTube Block
-    if (!isYouTubeAPILoaded && state.blocks.find((block) => block.type === BlockTypes.YOUTUBE)) {
+    if (state.blocks.find((block) => block.type === BlockTypes.YOUTUBE)) {
       const youTubeAPIScript = document.createElement('script');
       youTubeAPIScript.src = 'https://www.youtube.com/iframe_api';
 

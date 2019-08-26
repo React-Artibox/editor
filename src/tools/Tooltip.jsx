@@ -17,6 +17,7 @@ import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
 import YoutubeInput from './YoutubeInput';
 import FacebookInput from './FacebookInput';
+import InstagramInput from './InstagramInput';
 import {
   IMAGE_BLOCK_BASIC,
   TEXT_TITLE,
@@ -276,12 +277,9 @@ function Tooltip({
           blockId={blockId} />
       ) : null}
       {features & INSTAGRAM_BLOCK ? (
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.INSTAGRAM fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
+        <InstagramInput
+          isHover={isHover}
+          blockId={blockId} />
       ) : null}
       {features & FACEBOOK_BLOCK ? (
         <FacebookInput

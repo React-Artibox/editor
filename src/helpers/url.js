@@ -12,6 +12,27 @@ export function isYouTubeURL(url = '') {
   return YOUTUBE_RE.test(url);
 }
 
+const INSTARAM_EMBED_RE = /<blockquote.*class="instagram-media".*www.instagram.com\/embed\.js/;
+
+export function getInstagramURL(url = '') {
+  const template = document.createElement('template');
+  template.innerHTML = url;
+
+  const blockquote = template.content.firstChild;
+
+  if (blockquote && blockquote.nodeName === 'BLOCKQUOTE') {
+    const [{ href }] = blockquote.firstChild?.children;
+
+    return href.replace(/^https:\/\/www\.instagram\.com\//, '').replace(/\/$/, '');
+  }
+
+  return undefined;
+}
+
+export function isInstagramURL(url = '') {
+  return INSTARAM_EMBED_RE.test(url);
+}
+
 const FACEBOOK_IFRAME_RE = /^(?:<iframe\s).*src="https:\/\/((?:www|m)\.)?(?:facebook\.com|fb\.com)\/plugins\/(video|post)\.php\?([^"]*href=[^"]*)"[^>]*>/;
 
 function getFacebookTypeFromPathname(pathname = '') {

@@ -18,6 +18,7 @@
     "Node",
     "YT",
     "FB",
+    "instgrm",
   },
   "parser": "babel-eslint",
   "extends": [

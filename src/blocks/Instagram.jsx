@@ -3,6 +3,7 @@
 
 import React, {
   useCallback,
+  useEffect,
   useContext,
 } from 'react';
 import qs from 'querystring';
@@ -52,38 +53,31 @@ const styles = {
     border: 0,
     overflow: 'hidden',
   },
+  blockquote: {
+    background: '#FFF',
+    border: 0,
+    borderRadius: 3,
+    boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
+    margin: 1,
+    maxWidth: 540,
+    minWidth: 326,
+    padding: 0,
+    width: 'calc(100% - 2px)',
+  },
 };
 
-function Facebook({
+function Instagram({
   content,
   id,
   focus,
-  meta,
 }: BlockProps) {
   const dispatch = useContext(DispatchContext);
 
-  const getIframeSrc = useCallback(() => {
-    const type = meta ? meta.type : 'post';
-
-    const dataPayload = {};
-
-    dataPayload.href = `https://www.facebook.com/${content}`;
-    dataPayload.width = meta.width;
-    dataPayload.height = meta.height;
-
-    const params = qs.stringify(dataPayload);
-
-    switch (type) {
-      case 'post':
-        return `https://www.facebook.com/plugins/post.php?${params}`;
-
-      case 'video':
-        return `https://www.facebook.com/plugins/video.php?${params}`;
-
-      default:
-        return null;
+  useEffect(() => {
+    if (typeof instgrm !== 'undefined') {
+      instgrm.Embeds.process();
     }
-  }, [content, meta]);
+  }, []);
 
   return (
     <div style={focus ? styles.focusWrapper : styles.wrapper}>
@@ -116,19 +110,14 @@ function Facebook({
             type: Actions.FOCUS,
             id,
           })} />
-        <iframe
-          title={content}
-          src={getIframeSrc()}
-          width={meta.width}
-          height={meta.height}
-          style={styles.iframe}
-          scrolling="no"
-          frameBorder="0"
-          allowtransparency="true"
-          allow="encrypted-media" />
+        <blockquote
+          className="instagram-media"
+          data-instgrm-permalink={`https://www.instagram.com/${content}`}
+          data-instgrm-version="12"
+          style={styles.blockquote} />
       </div>
     </div>
   );
 }
 
-export default Facebook;
+export default Instagram;

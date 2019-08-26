@@ -14,6 +14,7 @@ import Actions from './constants/actions';
 import { Dispatch as DispatchContext } from './constants/context';
 import { fromJSON } from './helpers/json';
 import useYoutubeAPILoad from './hooks/useYoutubeAPILoad';
+import useInstagramAPILoad from './hooks/useInstagramAPILoad';
 
 // Blocks
 import Text from './blocks/Text';
@@ -21,6 +22,7 @@ import Image from './blocks/Image';
 import YouTube from './blocks/YouTube';
 import Line from './blocks/Line';
 import Facebook from './blocks/Facebook';
+import Instagram from './blocks/Instagram';
 
 const styles = {
   wrapper: {
@@ -309,6 +311,7 @@ function Editor({
   const prevState = usePreviousState(state);
 
   const isYouTubeAPILoaded = useYoutubeAPILoad(state);
+  const isInstagramAPILoaded = useInstagramAPILoad(state);
 
   useEffect(() => {
     // Focus on block removed
@@ -344,8 +347,6 @@ function Editor({
     )
   ), [state.blocks, placeholder]);
 
-  console.log('block', state);
-
   return (
     <DispatchContext.Provider value={dispatch}>
       <div ref={container} style={styles.wrapper}>
@@ -363,6 +364,19 @@ function Editor({
                   firstLoaded={firstLoaded}
                   key={block.id} />
               );
+
+            case BlockTypes.INSTAGRAM:
+              return isInstagramAPILoaded ? (
+                <Instagram
+                  id={block.id}
+                  focus={block.focus}
+                  content={block.content}
+                  meta={block.meta}
+                  loaded={block.loaded}
+                  type={block.type}
+                  firstLoaded={firstLoaded}
+                  key={block.id} />
+              ) : null;
 
             case BlockTypes.YOUTUBE:
               return isYouTubeAPILoaded ? (

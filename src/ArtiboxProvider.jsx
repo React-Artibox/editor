@@ -10,6 +10,7 @@ import {
   YOUTUBE_BLOCK,
   SPLIT_LINE,
   FACEBOOK_BLOCK,
+  INSTAGRAM_BLOCK,
 } from './constants/features';
 
 type Props = {
@@ -30,6 +31,7 @@ const defaultOptions = {
     | YOUTUBE_BLOCK
     | SPLIT_LINE
     | FACEBOOK_BLOCK
+    | INSTAGRAM_BLOCK
   ),
 };
 

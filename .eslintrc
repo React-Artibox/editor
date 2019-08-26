@@ -17,6 +17,7 @@
     "Image",
     "Node",
     "YT",
+    "FB",
   },
   "parser": "babel-eslint",
   "extends": [

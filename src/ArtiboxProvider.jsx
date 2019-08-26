@@ -9,6 +9,7 @@ import {
   IMAGE_ALIGN,
   YOUTUBE_BLOCK,
   SPLIT_LINE,
+  FACEBOOK_BLOCK,
 } from './constants/features';
 
 type Props = {
@@ -28,6 +29,7 @@ const defaultOptions = {
     | IMAGE_ALIGN
     | YOUTUBE_BLOCK
     | SPLIT_LINE
+    | FACEBOOK_BLOCK
   ),
 };
 

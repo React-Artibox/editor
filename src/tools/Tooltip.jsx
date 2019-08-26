@@ -2,11 +2,8 @@
 /* eslint no-nested-ternary: 0 */
 
 import React, {
-  Fragment,
-  useRef,
   useState,
   useContext,
-  useEffect,
   useMemo,
 } from 'react';
 import { EventEmitter } from 'events';
@@ -18,10 +15,8 @@ import {
 import Progress from '../constants/progress';
 import Actions from '../constants/actions';
 import BlockTypes from '../constants/blockTypes';
-import {
-  isYouTubeURL,
-  getYouTubeId,
-} from '../helpers/url';
+import YoutubeInput from './YoutubeInput';
+import FacebookInput from './FacebookInput';
 import {
   IMAGE_BLOCK_BASIC,
   TEXT_TITLE,
@@ -120,83 +115,6 @@ const styles = {
     fontWeight: 300,
     margin: '8px 0 0 0',
   },
-  anchorWrapper: {
-    position: 'relative',
-  },
-  urlInputBlock: {
-    width: 0,
-    height: 0,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    boxShadow: 'none',
-    opacity: 0,
-    position: 'absolute',
-    top: 40,
-    left: 'calc(50% - 120px)',
-    border: 0,
-    zIndex: 0,
-  },
-  urlInputBlockShown: {
-    width: 420,
-    height: 'auto',
-    overflow: 'visible',
-    border: '1px solid #DBDBDB',
-    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.12)',
-    opacity: 1,
-    transition: 'opacity 0.2s ease-out',
-    position: 'absolute',
-    top: 40,
-    right: -8,
-    zIndex: 10,
-    borderRadius: 4,
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    flexDirection: 'column',
-    padding: '0 12px 12px 12px',
-  },
-  urlInputTitle: {
-    lineHeight: '32px',
-    fontSize: 12,
-    color: '#4a4a4a',
-    letterSpacing: 1,
-    width: '100%',
-    padding: '2px 0 0 1px',
-    borderBottom: '1px solid #dfdfdf',
-    margin: '0 0 12px 0',
-  },
-  urlInput: {
-    border: 0,
-    width: '100%',
-    fontSize: 15,
-    color: '#4a4a4a',
-    outline: 'none',
-    padding: '0 0.6em',
-    resize: 'none',
-    borderRadius: 4,
-    backgroundColor: '#f3f3f3',
-    height: 30,
-    lineHeight: '30px',
-  },
-  urlInputWrapper: {
-    position: 'relative',
-    width: '100%',
-  },
-  insertButton: {
-    padding: '0 7px 0 8px',
-    fontSize: 12,
-    color: '#fff',
-    backgroundColor: '#1BDCDC',
-    borderRadius: 2,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
-    position: 'absolute',
-    fontWeight: 400,
-    right: 4,
-    top: 4,
-    outline: 'none',
-    border: 0,
-    lineHeight: '22px',
-  },
   spliter: {
     width: 1,
     height: 16,
@@ -218,38 +136,15 @@ function Tooltip({
 }: Props) {
   const [isHover, setHover] = useState(false);
   const [progress, setProgress] = useState(null);
-  const [isYouTubeURLInputShown, setYouTubeURLInputShow] = useState(false);
-  const [youTubeURL, setYouTubeURL] = useState('');
-  const [isVaildYouTubeURL, setIsValidYouTubeURL] = useState(false);
-  const youtubeInput = useRef();
+  const dispatch = useContext(DispatchContext);
 
   const {
     parseImageFile,
     features,
   } = useContext(ConfigContext);
-  const dispatch = useContext(DispatchContext);
-
-  // // Check YouTube URL
-  useEffect(() => {
-    setIsValidYouTubeURL(isYouTubeURL(youTubeURL));
-  }, [youTubeURL]);
-
-  // Reset YouTube URL Input
-  useEffect(() => {
-    if (isYouTubeURLInputShown) {
-      const { current } = youtubeInput;
-
-      if (current) {
-        current.focus();
-      }
-    } else {
-      setIsValidYouTubeURL(false);
-      setYouTubeURL('');
-    }
-  }, [isYouTubeURLInputShown]);
 
   const availableButtons = useMemo(() => (
-    <Fragment>
+    <>
       {features & TEXT_TITLE ? (
         <button
           onClick={() => (type === BlockTypes.TITLE ? (
@@ -349,7 +244,7 @@ function Tooltip({
                 const emitter = new EventEmitter();
 
                 emitter.on(Progress.START, () => setProgress(0));
-                emitter.on(Progress.PROGRESS, p => setProgress(p));
+                emitter.on(Progress.PROGRESS, (p) => setProgress(p));
                 emitter.on(Progress.END, () => setProgress(null));
 
                 const url = await parseImageFile(files[0], emitter);
@@ -376,56 +271,9 @@ function Tooltip({
         </button>
       ) : null}
       {features & YOUTUBE_BLOCK ? (
-        <div style={styles.anchorWrapper}>
-          <button
-            onClick={() => setYouTubeURLInputShow(!isYouTubeURLInputShown)}
-            className="artibox-tooltip-btn"
-            style={styles.blockBtn}
-            type="button">
-            <Icons.VIDEO fill={isHover ? '#242424' : '#DBDBDB'} />
-          </button>
-          <div style={isYouTubeURLInputShown ? styles.urlInputBlockShown : styles.urlInputBlock}>
-            <h6 style={styles.urlInputTitle}>YouTube URL:</h6>
-            <div style={styles.urlInputWrapper}>
-              <input
-                onKeyPress={({ which }) => {
-                  if (isVaildYouTubeURL && which === 13) {
-                    dispatch({
-                      type: Actions.CHANGE_TYPE,
-                      id: blockId,
-                      newType: BlockTypes.YOUTUBE,
-                      content: getYouTubeId(youTubeURL),
-                    });
-
-                    setYouTubeURLInputShow(false);
-                  }
-                }}
-                ref={youtubeInput}
-                onChange={({ target }) => setYouTubeURL(target.value)}
-                value={youTubeURL}
-                style={styles.urlInput}
-                placeholder="https://www.youtube.com/watch?v=xxxxxxx"
-                type="text" />
-              {isVaildYouTubeURL ? (
-                <button
-                  onClick={() => {
-                    dispatch({
-                      type: Actions.CHANGE_TYPE,
-                      id: blockId,
-                      newType: BlockTypes.YOUTUBE,
-                      content: getYouTubeId(youTubeURL),
-                    });
-
-                    setYouTubeURLInputShow(false);
-                  }}
-                  style={styles.insertButton}
-                  type="button">
-                  Insert!
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
+        <YoutubeInput
+          isHover={isHover}
+          blockId={blockId} />
       ) : null}
       {features & INSTAGRAM_BLOCK ? (
         <button
@@ -436,25 +284,19 @@ function Tooltip({
         </button>
       ) : null}
       {features & FACEBOOK_BLOCK ? (
-        <button
-          className="artibox-tooltip-btn"
-          style={styles.blockBtn}
-          type="button">
-          <Icons.FACEBOOK fill={isHover ? '#242424' : '#DBDBDB'} />
-        </button>
+        <FacebookInput
+          isHover={isHover}
+          blockId={blockId} />
       ) : null}
-    </Fragment>
+    </>
   ), [
     hasContent,
     features,
     dispatch,
     blockId,
     isHover,
-    isYouTubeURLInputShown,
-    isVaildYouTubeURL,
     parseImageFile,
     type,
-    youTubeURL,
   ]);
 
   const progressStyles = useMemo(() => {
@@ -474,7 +316,7 @@ function Tooltip({
   }, [progress]);
 
   return (
-    <Fragment>
+    <>
       <div style={progress === null ? styles.progressWrapper : styles.progressWrapperShown}>
         <div style={styles.progressBar}>
           <span style={progressStyles} />
@@ -490,7 +332,7 @@ function Tooltip({
         style={styles.wrapper}>
         {availableButtons}
       </div>
-    </Fragment>
+    </>
   );
 }
 

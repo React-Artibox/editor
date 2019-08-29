@@ -337,6 +337,10 @@ function Editor({
         setFirstLoaded(true);
       }
     }
+
+    if (prevState !== state) {
+      onChange(state);
+    }
   }, [firstLoaded, onChange, state, prevState]);
 
   const placeholderZone = useMemo(() => (

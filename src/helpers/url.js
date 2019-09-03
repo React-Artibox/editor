@@ -66,7 +66,7 @@ export function getFacebookURLInfo(url = '') {
     return {
       width: Number(iframe.width),
       height: Number(iframe.height),
-      content: resourceURL.pathname,
+      content: `${resourceURL.pathname}${resourceURL.search}`,
       type: getFacebookTypeFromPathname(parsedURL.pathname),
     };
   }
